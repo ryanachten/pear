@@ -4,14 +4,14 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 @Injectable({
   providedIn: "root",
 })
-export class SignalService {
+export class StreamService {
   connection: HubConnection;
 
   constructor() {
-    this.initSignal();
+    this.initStream();
   }
 
-  async initSignal() {
+  async initStream() {
     try {
       this.connection = new HubConnectionBuilder()
         .withUrl("http://localhost:5000/stream")
@@ -19,7 +19,7 @@ export class SignalService {
       await this.connection.start();
       this.connection.on("messageReceived", this.onMessageReceived);
     } catch (error) {
-      console.error("Error initialising SignalR client", error);
+      console.error("Error initialising stream client", error);
     }
   }
 

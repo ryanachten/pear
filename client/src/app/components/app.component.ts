@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { SignalService } from "../services/signal.service";
+import { StreamService } from "../services/stream.service";
 
 @Component({
   selector: "app-root",
@@ -7,5 +7,5 @@ import { SignalService } from "../services/signal.service";
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  constructor(private signal: SignalService) {}
+  constructor(private stream: StreamService) {}
 }
