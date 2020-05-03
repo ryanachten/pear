@@ -22,12 +22,13 @@ export class CanvasComponent implements OnInit {
       .build();
 
     connection.on("messageReceived", (message: string) => {
-      console.log("message", message);
+      console.log("messageReceived", message);
     });
 
-    connection.start().catch((error) => console.log("signal error", error));
-
-    connection.send("newMessage", "Testing sending message");
+    connection
+      .start()
+      .then(() => connection.send("newMessage", "Testing sending message"))
+      .catch((error) => console.log("signal error", error));
   }
 
   initThree() {
