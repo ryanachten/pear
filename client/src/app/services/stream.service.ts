@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
@@ -14,7 +15,7 @@ export class StreamService {
   async initStream() {
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl("http://localhost:5000/stream")
+        .withUrl(`${environment.apiUrl}/stream`)
         .build();
       await this.connection.start();
       this.connection.on("messageReceived", this.onMessageReceived);
