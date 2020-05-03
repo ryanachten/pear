@@ -44,7 +44,14 @@ namespace Echo
 
             app.UseAuthorization();
 
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(builder =>
+            {
+                // TODO: need to refactor as app setting for production
+                builder.WithOrigins("http://localhost:5200")
+                    .AllowAnyHeader()
+                    .WithMethods("GET", "POST")
+                    .AllowCredentials();
+            });
 
             app.UseEndpoints(endpoints =>
             {
