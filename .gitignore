@@ -1,0 +1,9 @@
+.vscode/*
+.DS_Store
+
+# .Net build files
+**/bin/*
+**/obj/*
+
+# Local DB
+angulardotnet.db*
