@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import * as THREE from "three";
+import * as signalR from "@microsoft/signalr";
 
 @Component({
   selector: "app-canvas",
@@ -10,7 +11,23 @@ export class CanvasComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
+    this.initSignal();
     this.initThree();
+  }
+
+  // TODO: refactor as service
+  initSignal() {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/stream")
+      .build();
+
+    connection.on("messageReceived", (message: string) => {
+      console.log("message", message);
+    });
+
+    connection.start().catch((error) => console.log("signal error", error));
+
+    connection.send("newMessage", "Testing sending message");
   }
 
   initThree() {
