@@ -39,10 +39,11 @@ namespace Echo
 
             app.UseCors(builder =>
             {
+                var origins = Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
                 builder
-                    .WithOrigins(Configuration.GetSection("Cors:AllowedOrigins").Value)
+                    .WithOrigins(origins)
                     .AllowAnyHeader()
-                    .WithMethods("GET", "POST")
+                    .AllowAnyMethod()
                     .AllowCredentials();
             });
 
