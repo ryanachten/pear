@@ -1,34 +1,56 @@
 import { Injectable } from "@angular/core";
-import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  Subject,
+} from "@microsoft/signalr";
 import { environment } from "src/environments/environment";
+import { User, Signal } from "../models";
 
 @Injectable({
   providedIn: "root",
 })
 export class StreamService {
-  connection: HubConnection;
+  private connection: HubConnection;
+
+  private newPeer = new Subject<User>();
+  private helloAnswer = new Subject<User>();
+  private disconnectedPeer = new Subject<User>();
+  private signal = new Subject<Signal>();
 
   constructor() {
-    this.initStream();
+    this.startConnection();
   }
 
-  async initStream() {
+  async startConnection(currentUser: string): Promise<void> {
     try {
+      // Start SignalR connection
       this.connection = new HubConnectionBuilder()
         .withUrl(`${environment.apiUrl}/stream`)
         .build();
       await this.connection.start();
-      this.connection.on("messageReceived", this.onMessageReceived);
+
+      // Define event handers
+      this.connection.on("NewUserArrived", (data) => {
+        this.newPeer.next(JSON.parse(data));
+      });
+      this.connection.on("UserSaidHello", (data) => {
+        this.helloAnswer.next(JSON.parse(data));
+      });
+      this.connection.on("UserDisconnect", (data) => {
+        this.disconnectedPeer.next(JSON.parse(data));
+      });
+      this.connection.on("UserDisconnect", (data) => {
+        this.disconnectedPeer.next(JSON.parse(data));
+      });
+      this.connection.on("SendSignal", (user, signal) => {
+        this.signal.next({ user, signal });
+      });
+
+      // Invoke new user event
+      this.connection.invoke("NewUser", currentUser);
     } catch (error) {
       console.error("Error initialising stream client", error);
     }
-  }
-
-  onMessageReceived(message: string) {
-    console.log("onMessageReceived", message);
-  }
-
-  sendMessage() {
-    this.connection.send("newMessage", "Testing sending message");
   }
 }
