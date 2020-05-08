@@ -18,11 +18,9 @@ export class StreamService {
   private disconnectedPeer = new Subject<User>();
   private signal = new Subject<Signal>();
 
-  constructor() {
-    this.startConnection();
-  }
+  constructor() {}
 
-  async startConnection(currentUser: string): Promise<void> {
+  public async startConnection(currentUser: string): Promise<void> {
     try {
       // Start SignalR connection
       this.connection = new HubConnectionBuilder()
@@ -52,5 +50,13 @@ export class StreamService {
     } catch (error) {
       console.error("Error initialising stream client", error);
     }
+  }
+
+  public sendSignalToUser(signal: string, user: string) {
+    this.connection.invoke("SendSignal", signal, user);
+  }
+
+  public sayHello(user: string, recipient: string) {
+    this.connection.invoke("HelloUser", user, recipient);
   }
 }
