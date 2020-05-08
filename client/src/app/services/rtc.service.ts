@@ -72,4 +72,20 @@ export class RtcService {
 
     return peer;
   }
+
+  public signalPeer(userId: string, signalStr: string, stream: MediaStream) {
+    const signal = JSON.parse(signalStr);
+    // If current peer exists, it means we are the initiator of the call
+    if (this.currentPeer) {
+      return this.currentPeer.signal(signal);
+    }
+    // If peers exists it means we are not the initiator
+    // and we need to create a peer instance to receive the video call
+    this.currentPeer = this.createPeer(stream, userId, false);
+    this.currentPeer.signal(signal);
+  }
+
+  public sendMessage(message: string) {
+    this.currentPeer.send(message);
+  }
 }
