@@ -6,6 +6,7 @@ import {
 } from "@microsoft/signalr";
 import { environment } from "src/environments/environment";
 import { User, Signal } from "../models";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -13,9 +14,11 @@ import { User, Signal } from "../models";
 export class StreamService {
   private connection: HubConnection;
 
-  private newPeer = new Subject<User>();
-  private helloAnswer = new Subject<User>();
-  private disconnectedPeer = new Subject<User>();
+  public newPeer = new Subject<User>();
+  // Replacement for public newPeer$ = this.newPeer.asObservable(); no idea if this will work
+  public newPeer$ = new Observable(() => this.newPeer.subscribe);
+  public helloAnswer = new Subject<User>();
+  public disconnectedPeer = new Subject<User>();
   private signal = new Subject<Signal>();
 
   constructor() {}
