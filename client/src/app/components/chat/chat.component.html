@@ -1,0 +1,9 @@
+<div>
+    <input [(ngModel)]="currentUser" required placeholder="UserName" type="text">
+    <button [disabled]="!currentUser" (click)="saveUsername()" type="button">Save</button>
+    <ul>
+        <li *ngFor="let user of users">{{user.userName}}</li>
+    </ul>
+    <input [(ngModel)]="dataString" required placeholder="Write a message" type="text">
+    <button (click)="sendMessage()" type="button">Send</button>
+</div>

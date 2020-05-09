@@ -2,13 +2,14 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, Subject } from "rxjs";
 import { User, Peer } from "../models";
 import { Instance } from "simple-peer";
-import * as SimplePeer from "simple-peer";
+
+declare var SimplePeer: any;
 
 @Injectable({
   providedIn: "root",
 })
 export class RtcService {
-  private users: BehaviorSubject<User[]>;
+  public users: BehaviorSubject<User[]>;
 
   private onSignalToSend = new Subject<Peer>();
   private onStream = new Subject<Peer>();
