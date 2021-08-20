@@ -4,6 +4,3 @@
 # .Net build files
 **/bin/*
 **/obj/*
-
-# Local DB
-angulardotnet.db*

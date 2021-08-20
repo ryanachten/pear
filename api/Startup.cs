@@ -21,6 +21,17 @@ namespace Echo
         {
             services.AddControllers();
             services.AddSignalR();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("ClientPermission", policy =>
+                {
+                    policy.AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .WithOrigins("http://localhost:3000")
+                        .AllowCredentials();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,20 +48,23 @@ namespace Echo
 
             app.UseAuthorization();
 
-            app.UseCors(builder =>
-            {
-                var origins = Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-                builder
-                    .WithOrigins(origins)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
+            app.UseCors("ClientPermission");
+
+            // app.UseCors(builder =>
+            // {
+            //     var origins = Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            //     builder
+            //         .WithOrigins(origins)
+            //         .AllowAnyHeader()
+            //         .AllowAnyMethod()
+            //         .AllowCredentials();
+            // });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<StreamHub>("/stream");
+                // endpoints.MapHub<StreamHub>("/stream");
+                endpoints.MapHub<ChatHub>("/hubs/chat");
             });
         }
     }
