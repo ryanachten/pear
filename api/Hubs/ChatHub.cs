@@ -11,5 +11,13 @@ namespace api.Hubs
         {
             await Clients.All.ReceiveMessage(message);
         }
+        public async Task SendStream(object stream)
+        {
+            await Clients.All.ReceiveStream(stream);
+        }
+        public async Task SendSignal(object signal)
+        {
+            await Clients.All.ReceiveSignal(signal);
+        }
     }
 }
