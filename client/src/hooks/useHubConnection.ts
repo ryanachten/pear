@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  HubConnectionState,
+} from "@microsoft/signalr";
 
 export const useHubConnection = () => {
   const [connection, setConnection] = useState<HubConnection>();
@@ -9,12 +13,13 @@ export const useHubConnection = () => {
     if (connection) {
       try {
         await connection.start();
-        console.log("Connected!");
+        console.log("Connected!", connection.state);
+        setConnection(connection);
+        setLoading(false);
       } catch (error) {
         console.error("Connection failed: ", error);
       }
     }
-    setLoading(false);
   }
 
   useEffect(() => {

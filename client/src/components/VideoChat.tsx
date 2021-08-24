@@ -1,51 +1,70 @@
-import { useEffect } from "react";
-import Peer from "simple-peer";
-import { SignalEvent } from "../constants/interfaces";
+import { useEffect, useState } from "react";
+import { SignalEvent, SignalRequest } from "../constants/interfaces";
 import { useHubConnection } from "../hooks/useHubConnection";
+import { SignalPeer } from "../models/SignalPeer";
 
 const VideoChat = () => {
   const connection = useHubConnection();
+  const [selfPeerId, setSelfPeerId] = useState("");
+  const [isRegistered, setRegistered] = useState(false);
+  const [peers, setPeers] = useState<Record<string, SignalPeer>>({});
   useEffect(() => {
-    if (connection) {
-      console.log("connection set", connection);
+    if (connection && connection.connectionId && !isRegistered) {
+      // Set peer ID to signalR connection ID
+      const peerId = connection.connectionId;
+      console.log("peerId", peerId);
+      setSelfPeerId(peerId);
 
-      connection.on(SignalEvent.ReceiveStream, (stream) => {
-        console.log("stream received", stream);
+      const selfPeer = new SignalPeer({
+        id: peerId,
+        connection,
+        videoSelector: "video-self",
       });
-      connection.on(SignalEvent.ReceiveSignal, (signal) => {
-        console.log("signal received", signal);
-        const peer = new Peer();
-        peer.signal(signal);
-        peer.on("connect", () => {
-          console.log("peer connected!");
-        });
 
-        peer.on("data", (data) => {
-          console.log("data", data);
-        });
-        peer.on("stream", (stream) => {
-          console.log("received stream!", stream);
-          // got remote video stream, now let's show it in a video tag
-          const video = document.querySelector<HTMLVideoElement>("#video-peer");
-          if (video === null) {
-            return console.error("No video element found");
-          }
+      connection.send(SignalEvent.SendNewPeer, {
+        sender: peerId,
+        // TODO: include peer metadata such as user information in the data property
+      } as SignalRequest);
+      setPeers({ ...peers, [peerId]: selfPeer });
 
-          if ("srcObject" in video) {
-            console.log("assigned video to stream", stream);
-            video.srcObject = stream;
-          } else {
-            // video.src = window.URL.createObjectURL(stream) // for older browsers
-          }
-          video.onloadedmetadata = function (e) {
-            console.log("metadata loaded, playing video");
-
-            video.play();
-          };
-        });
+      connection.on(SignalEvent.ReceiveNewPeer, (peer: SignalRequest) => {
+        console.log("new peer!", peer);
+        if (peer.sender !== peerId) {
+          const newPeer = new SignalPeer({
+            id: peer.sender,
+            connection,
+            videoSelector: "#video-peer",
+          });
+          setPeers({ ...peers, [peer.sender]: newPeer });
+        }
       });
+
+      connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
+        console.log("new initiator!", peer);
+        if (peer.sender !== peerId) {
+          const newPeer = new SignalPeer({
+            id: peer.sender,
+            initiator: true,
+            connection,
+            videoSelector: "#video-peer",
+          });
+          setPeers({ ...peers, [peer.sender]: newPeer });
+        }
+      });
+
+      connection.on(
+        SignalEvent.ReceivePeerDisconnected,
+        (peer: SignalRequest) => {
+          console.log("peer disconnected!", peer);
+          const updatedPeers = { ...peers };
+          delete updatedPeers[peerId];
+          setPeers({ ...updatedPeers });
+        }
+      );
+
+      setRegistered(true);
     }
-  }, [connection]);
+  }, [connection, connection?.connectionId, isRegistered]);
 
   const requestVideoShare = async () => {
     try {
@@ -60,30 +79,21 @@ const VideoChat = () => {
   };
 
   const shareVideoSignal = (stream: MediaStream) => {
-    const peer = new Peer({ initiator: true, stream: stream });
+    if (!connection) return;
 
-    peer.on("signal", (data) => {
-      // console.log("signal", data);
-      connection?.send(SignalEvent.SendSignal, data);
+    connection.send(SignalEvent.SendNewInitiator, {
+      sender: selfPeerId,
+    } as SignalRequest);
+
+    const newSelfPeer = new SignalPeer({
+      connection,
+      id: selfPeerId,
+      videoSelector: "video-self",
+      initiator: true,
+      stream,
     });
 
-    peer.on("stream", (stream) => {
-      // console.log("stream", stream);
-      connection?.send(SignalEvent.SendStream, stream);
-    });
-
-    // got remote video stream, now let's show it in a video tag
-    const video = document.querySelector<HTMLVideoElement>("#video-self");
-    if (video == null) {
-      return console.error("No video element found");
-    }
-
-    if ("srcObject" in video) {
-      video.srcObject = stream;
-    } else {
-      // video.src = window.URL.createObjectURL(stream) // for older browsers
-    }
-    video.play();
+    setPeers({ ...peers, [selfPeerId]: newSelfPeer });
   };
 
   return (

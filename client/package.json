@@ -16,6 +16,7 @@
     "react-scripts": "4.0.3",
     "simple-peer": "^9.11.0",
     "typescript": "^4.1.2",
+    "uuid": "^8.3.2",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
@@ -43,6 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@types/simple-peer": "^9.11.1"
+    "@types/simple-peer": "^9.11.1",
+    "@types/uuid": "^8.3.1"
   }
 }

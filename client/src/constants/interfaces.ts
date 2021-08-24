@@ -5,9 +5,24 @@ export type Message = {
 
 export enum SignalEvent {
   SendMessage = "SendMessage",
-  SendStream = "SendStream",
+  SendNewPeer = "SendNewPeer",
+  SendNewInitiator = "SendNewInitiator",
   SendSignal = "SendSignal",
   ReceiveMessage = "ReceiveMessage",
-  ReceiveStream = "ReceiveStream",
+  ReceiveNewPeer = "ReceiveNewPeer",
+  ReceiveNewInitiator = "ReceiveNewInitiator",
   ReceiveSignal = "ReceiveSignal",
+  ReceivePeerDisconnected = "ReceivePeerDisconnected",
+}
+
+export interface SignalRequest {
+  sender: string;
+  data: object;
+}
+
+export interface SignalResponse {
+  sender: string;
+  data: {
+    type: string;
+  };
 }
