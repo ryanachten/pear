@@ -21,11 +21,11 @@ export class SignalPeer {
   private connection: HubConnection;
 
   constructor(config: SignalPeerConfig) {
-    const { id, connection, initiator } = config;
+    const { id, connection, initiator, stream } = config;
     this.id = id;
     this.config = config;
     this.connection = connection;
-    this.instance = new Peer({ initiator, trickle: false });
+    this.instance = new Peer({ initiator, trickle: false, stream });
 
     this.registerEventListeners();
   }
@@ -69,10 +69,6 @@ export class SignalPeer {
     } else {
       // video.src = window.URL.createObjectURL(stream) // for older browsers
     }
-    video.onloadedmetadata = function (e) {
-      console.log("metadata loaded, playing video");
-
-      video.play();
-    };
+    video.play();
   }
 }

@@ -9,6 +9,14 @@ const VideoChat = () => {
   const [isRegistered, setRegistered] = useState(false);
   const [peers, setPeers] = useState<Record<string, SignalPeer>>({});
   useEffect(() => {
+    init();
+  }, [connection, connection?.connectionId, isRegistered]);
+
+  const init = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      // audio: true,
+    });
     if (connection && connection.connectionId && !isRegistered) {
       // Set peer ID to signalR connection ID
       const peerId = connection.connectionId;
@@ -17,8 +25,10 @@ const VideoChat = () => {
 
       const selfPeer = new SignalPeer({
         id: peerId,
+        initiator: true,
+        stream,
         connection,
-        videoSelector: "video-self",
+        videoSelector: "#video-self",
       });
 
       connection.send(SignalEvent.SendNewPeer, {
@@ -33,30 +43,32 @@ const VideoChat = () => {
           const newPeer = new SignalPeer({
             id: peer.sender,
             connection,
+            // stream,
             videoSelector: "#video-peer",
           });
           setPeers({ ...peers, [peer.sender]: newPeer });
         }
       });
 
-      connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
-        console.log("new initiator!", peer);
-        if (peer.sender !== peerId) {
-          const newPeer = new SignalPeer({
-            id: peer.sender,
-            initiator: true,
-            connection,
-            videoSelector: "#video-peer",
-          });
-          setPeers({ ...peers, [peer.sender]: newPeer });
-        }
-      });
+      // connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
+      //   console.log("new initiator!", peer);
+      //   if (peer.sender !== peerId) {
+      //     const newPeer = new SignalPeer({
+      //       id: peer.sender,
+      //       connection,
+      //       stream,
+      //       videoSelector: "#video-peer",
+      //     });
+      //     setPeers({ ...peers, [peer.sender]: newPeer });
+      //   }
+      // });
 
       connection.on(
         SignalEvent.ReceivePeerDisconnected,
         (peer: SignalRequest) => {
           console.log("peer disconnected!", peer);
           const updatedPeers = { ...peers };
+          updatedPeers[peerId].instance.destroy();
           delete updatedPeers[peerId];
           setPeers({ ...updatedPeers });
         }
@@ -64,7 +76,7 @@ const VideoChat = () => {
 
       setRegistered(true);
     }
-  }, [connection, connection?.connectionId, isRegistered]);
+  };
 
   const requestVideoShare = async () => {
     try {
@@ -99,7 +111,7 @@ const VideoChat = () => {
   return (
     <div>
       <video id="video-self" />
-      <video id="video-peer" autoPlay />
+      <video id="video-peer" />
       <button onClick={requestVideoShare}>Turn on video</button>
     </div>
   );
