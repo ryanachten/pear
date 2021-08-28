@@ -8,7 +8,6 @@ export type Message = {
 export enum SignalEvent {
   SendMessage = "SendMessage",
   SendConnected = "SendConnected",
-  SendNewPeer = "SendNewPeer",
   SendNewInitiator = "SendNewInitiator",
   SendSignal = "SendSignal",
   ReceiveMessage = "ReceiveMessage",

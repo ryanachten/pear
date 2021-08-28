@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { SignalData } from "simple-peer";
 import {
   SignalEvent,
   SignalRequest,
@@ -17,9 +16,7 @@ const VideoChat = () => {
   const connection = useHubConnection();
   const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
-  const [selfPeerId, setSelfPeerId] = useState("");
   const [isRegistered, setRegistered] = useState(false);
-  // const [peers, setPeers] = useState<Record<string, SignalPeer>>({});
 
   useEffect(() => {
     init();
@@ -36,20 +33,6 @@ const VideoChat = () => {
       // // Set peer ID to signalR connection ID
       const peerId = connection.connectionId;
       console.log("peerId", peerId);
-      // setSelfPeerId(peerId);
-
-      // const selfPeer = new SignalPeer({
-      //   id: peerId,
-      //   initiator: true,
-      //   stream,
-      //   connection,
-      // });
-
-      // connection.send(SignalEvent.SendNewPeer, {
-      //   sender: peerId,
-      //   // TODO: include peer metadata such as user information in the data property
-      // } as SignalRequest);
-      // setPeers({ ...peers, [peerId]: selfPeer });
 
       connection.send(SignalEvent.SendConnected, {
         sender: peerId,
@@ -91,7 +74,7 @@ const VideoChat = () => {
         (peer: SignalRequest) => {
           const updatedPeers = { ...peers };
           updatedPeers[peer.sender].instance.destroy();
-          // videosEl.current?.querySelector(`#${peerId}`)?.remove();
+          videosEl.current?.querySelector(`#${peer.sender}`)?.remove();
           delete updatedPeers[peer.sender];
           setPeers({ ...updatedPeers });
           console.log("peer disconnected!", peer, "total peers", peers);

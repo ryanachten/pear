@@ -1,10 +1,6 @@
 import { HubConnection } from "@microsoft/signalr";
-import Peer, { Instance, SignalData } from "simple-peer";
-import {
-  SignalRequest,
-  SignalEvent,
-  SignalResponse,
-} from "../constants/interfaces";
+import Peer, { Instance } from "simple-peer";
+import { SignalRequest, SignalEvent } from "../constants/interfaces";
 
 export interface SignalPeerConfig {
   id: string;
@@ -16,13 +12,11 @@ export interface SignalPeerConfig {
 export class SignalPeer {
   public id: string;
   public instance: Instance;
-  private config: SignalPeerConfig;
   private connection: HubConnection;
 
   constructor(config: SignalPeerConfig) {
     const { id, connection, initiator, stream } = config;
     this.id = id;
-    this.config = config;
     this.connection = connection;
     this.instance = new Peer({
       initiator,
@@ -61,7 +55,7 @@ export class SignalPeer {
 
     console.log("assigned video to stream", this.id, stream);
 
-    videoEl.id = stream.id;
+    videoEl.id = this.id;
     videoEl.srcObject = stream;
 
     videos.append(videoEl);

@@ -4,17 +4,11 @@ using api.Models;
 using api.Hubs.Clients;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 namespace api.Hubs
 {
     public class ChatHub : Hub<IChatClient>
     {
-        public ChatHub()
-        {
-            Console.WriteLine($"\n New session {DateTime.Now}\n");
-        }
-
         public static HashSet<string> ConnectedIds = new HashSet<string>();
 
         public override Task OnConnectedAsync()
@@ -44,21 +38,6 @@ namespace api.Hubs
         {
             await Clients.All.ReceiveMessage(message);
         }
-
-        // public async Task SendNewPeer(SignalRequest peer)
-        // {
-        //     Console.WriteLine($"\nSendNewPeer: ${peer.Sender}\n");
-
-        //     await Clients.All.ReceiveNewPeer(peer);
-
-        //     // foreach (var connectionId in ConnectedIds.Where(x => x != Context.ConnectionId))
-        //     // {
-        //     //     await Clients.Client(Context.ConnectionId).ReceiveNewPeer(new SignalRequest()
-        //     //     {
-        //     //         Sender = connectionId,
-        //     //     });
-        //     // }
-        // }
 
         public async Task SendNewInitiator(SignalRequest peer)
         {
