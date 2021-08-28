@@ -10,11 +10,17 @@ namespace api.Hubs
 {
     public class ChatHub : Hub<IChatClient>
     {
+        public ChatHub()
+        {
+            Console.WriteLine($"\n New session {DateTime.Now}\n");
+        }
+
         public static HashSet<string> ConnectedIds = new HashSet<string>();
 
         public override Task OnConnectedAsync()
         {
             ConnectedIds.Add(Context.ConnectionId);
+
             return base.OnConnectedAsync();
         }
 
@@ -28,38 +34,51 @@ namespace api.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
+        public async Task SendConnected(SignalRequest peer)
+        {
+            Console.WriteLine($"\n New peer connected: ${peer.Sender} \n");
+            await Clients.Others.ReceiveNewPeer(peer);
+        }
+
         public async Task SendMessage(ChatMessage message)
         {
             await Clients.All.ReceiveMessage(message);
         }
 
-        public async Task SendNewPeer(SignalRequest peer)
-        {
-            Console.WriteLine($"\nSendNewPeer: ${peer.Sender}\n");
+        // public async Task SendNewPeer(SignalRequest peer)
+        // {
+        //     Console.WriteLine($"\nSendNewPeer: ${peer.Sender}\n");
 
-            await Clients.Others.ReceiveNewPeer(peer);
+        //     await Clients.All.ReceiveNewPeer(peer);
 
-            foreach (var connectionId in ConnectedIds.Where(x => x != Context.ConnectionId))
-            {
-                await Clients.Client(Context.ConnectionId).ReceiveNewPeer(new SignalRequest()
-                {
-                    Sender = connectionId,
-                });
-            }
-        }
+        //     // foreach (var connectionId in ConnectedIds.Where(x => x != Context.ConnectionId))
+        //     // {
+        //     //     await Clients.Client(Context.ConnectionId).ReceiveNewPeer(new SignalRequest()
+        //     //     {
+        //     //         Sender = connectionId,
+        //     //     });
+        //     // }
+        // }
 
         public async Task SendNewInitiator(SignalRequest peer)
         {
             Console.WriteLine($"\nSendNewInitiator: ${peer.Sender}\n");
 
-            await Clients.All.ReceiveNewInitiator(peer);
+            await Clients.Client(peer.Receiver).ReceiveNewInitiator(peer);
         }
 
-        public async Task SendSignal(SignalRequest signal)
+        //  Send message to client to initiate a connection
+        //  The sender has already setup a peer connection receiver
+        public async Task SendSignal(SignalRequest request)
         {
-            Console.WriteLine($"\nSendSignal: ${signal.Sender} ${signal.Data.ToString()}\n");
+            // sender = connection ID -> receiver = receiver in payload
+            Console.WriteLine($"\nSendSignal: from ${Context.ConnectionId} to ${request.Receiver} ${request.Data.ToString()}\n");
 
-            await Clients.Others.ReceiveSignal(signal);
+            await Clients.Client(request.Receiver).ReceiveSignal(new SignalRequest
+            {
+                Sender = Context.ConnectionId,
+                Data = request.Data
+            });
         }
     }
 }

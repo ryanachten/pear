@@ -1,3 +1,5 @@
+import { SignalData } from "simple-peer";
+
 export type Message = {
   user: string;
   message: string;
@@ -5,6 +7,7 @@ export type Message = {
 
 export enum SignalEvent {
   SendMessage = "SendMessage",
+  SendConnected = "SendConnected",
   SendNewPeer = "SendNewPeer",
   SendNewInitiator = "SendNewInitiator",
   SendSignal = "SendSignal",
@@ -17,12 +20,12 @@ export enum SignalEvent {
 
 export interface SignalRequest {
   sender: string;
+  receiver: string;
   data: object;
 }
 
 export interface SignalResponse {
   sender: string;
-  data: {
-    type: string;
-  };
+  receiver: string;
+  data: SignalData;
 }

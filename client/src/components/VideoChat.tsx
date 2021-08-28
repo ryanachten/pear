@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { SignalEvent, SignalRequest } from "../constants/interfaces";
+import { SignalData } from "simple-peer";
+import {
+  SignalEvent,
+  SignalRequest,
+  SignalResponse,
+} from "../constants/interfaces";
 import { useHubConnection } from "../hooks/useHubConnection";
 import { SignalPeer } from "../models/SignalPeer";
 
@@ -28,46 +33,58 @@ const VideoChat = () => {
     if (connection && connection.connectionId && !isRegistered) {
       setupSelfVideo(stream);
 
-      // Set peer ID to signalR connection ID
+      // // Set peer ID to signalR connection ID
       const peerId = connection.connectionId;
       console.log("peerId", peerId);
-      setSelfPeerId(peerId);
+      // setSelfPeerId(peerId);
 
-      const selfPeer = new SignalPeer({
-        id: peerId,
-        initiator: true,
-        stream,
-        connection,
-      });
+      // const selfPeer = new SignalPeer({
+      //   id: peerId,
+      //   initiator: true,
+      //   stream,
+      //   connection,
+      // });
 
-      connection.send(SignalEvent.SendNewPeer, {
+      // connection.send(SignalEvent.SendNewPeer, {
+      //   sender: peerId,
+      //   // TODO: include peer metadata such as user information in the data property
+      // } as SignalRequest);
+      // setPeers({ ...peers, [peerId]: selfPeer });
+
+      connection.send(SignalEvent.SendConnected, {
         sender: peerId,
-        // TODO: include peer metadata such as user information in the data property
-      } as SignalRequest);
-      setPeers({ ...peers, [peerId]: selfPeer });
+      });
 
       connection.on(SignalEvent.ReceiveNewPeer, (peer: SignalRequest) => {
         const newPeer = new SignalPeer({
           id: peer.sender,
           connection,
-          // stream,
+          stream,
         });
         setPeers({ ...peers, [peer.sender]: newPeer });
         console.log("new peer!", peer, "total peers", peers);
+
+        connection.send(SignalEvent.SendNewInitiator, {
+          sender: peerId,
+          receiver: peer.sender,
+        } as SignalRequest);
       });
 
-      // connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
-      //   console.log("new initiator!", peer);
-      //   if (peer.sender !== peerId) {
-      //     const newPeer = new SignalPeer({
-      //       id: peer.sender,
-      //       connection,
-      //       stream,
-      //       videoSelector: "#video-peer",
-      //     });
-      //     setPeers({ ...peers, [peer.sender]: newPeer });
-      //   }
-      // });
+      connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
+        console.log("new initiator!", peer);
+        const newPeer = new SignalPeer({
+          id: peer.sender,
+          initiator: true,
+          connection,
+          stream,
+        });
+        setPeers({ ...peers, [peer.sender]: newPeer });
+      });
+
+      // When we receive a signal from signalR, we apply to peer
+      connection.on(SignalEvent.ReceiveSignal, (signal: SignalResponse) =>
+        peers[signal.sender].instance.signal(signal.data)
+      );
 
       connection.on(
         SignalEvent.ReceivePeerDisconnected,
@@ -91,36 +108,6 @@ const VideoChat = () => {
       selfVideoEl.current.play();
     }
   };
-
-  // const requestVideoShare = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({
-  //       video: true,
-  //       // audio: true,
-  //     });
-  //     shareVideoSignal(stream);
-  //   } catch (error) {
-  //     console.log("Error getting media", error);
-  //   }
-  // };
-
-  // const shareVideoSignal = (stream: MediaStream) => {
-  //   if (!connection) return;
-
-  //   connection.send(SignalEvent.SendNewInitiator, {
-  //     sender: selfPeerId,
-  //   } as SignalRequest);
-
-  //   const newSelfPeer = new SignalPeer({
-  //     connection,
-  //     id: selfPeerId,
-  //     videoSelector: "video-self",
-  //     initiator: true,
-  //     stream,
-  //   });
-
-  //   setPeers({ ...peers, [selfPeerId]: newSelfPeer });
-  // };
 
   return (
     <div ref={videosEl} className="videos">

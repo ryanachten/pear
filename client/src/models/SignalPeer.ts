@@ -33,23 +33,13 @@ export class SignalPeer {
   }
 
   private registerEventListeners() {
-    // When we receive a signal from signalR, we apply to peer
-    this.connection.on(SignalEvent.ReceiveSignal, (signal: SignalResponse) => {
-      const data = signal.data as SignalData;
-      if (signal.sender !== this.id) {
-        console.log(this.id, "received signal");
-
-        this.instance.signal(data);
-      }
-    });
-
     // When peer receives a signal, transmit it via signalR
     this.instance.on("connect", () => console.log("Peer connected", this.id));
 
     // When peer receives a signal, transmit it via signalR
     this.instance.on("signal", (data) =>
       this.connection.send(SignalEvent.SendSignal, {
-        sender: this.id,
+        receiver: this.id,
         data,
       } as SignalRequest)
     );
