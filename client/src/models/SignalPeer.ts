@@ -9,7 +9,6 @@ import {
 export interface SignalPeerConfig {
   id: string;
   connection: HubConnection;
-  videoSelector: string;
   initiator?: boolean;
   stream?: MediaStream;
 }
@@ -25,7 +24,10 @@ export class SignalPeer {
     this.id = id;
     this.config = config;
     this.connection = connection;
-    this.instance = new Peer({ initiator, trickle: false, stream });
+    this.instance = new Peer({
+      initiator,
+      stream,
+    });
 
     this.registerEventListeners();
   }
@@ -57,18 +59,23 @@ export class SignalPeer {
   }
 
   private initVideoPlayback(stream: MediaStream) {
-    const { videoSelector } = this.config;
-    const video = document.querySelector<HTMLVideoElement>(videoSelector);
-    if (video === null) {
+    const videos = document.querySelector(".videos");
+
+    if (videos === null) {
       return console.error("No video element found");
     }
 
-    if ("srcObject" in video) {
-      console.log("assigned video to stream", stream);
-      video.srcObject = stream;
-    } else {
-      // video.src = window.URL.createObjectURL(stream) // for older browsers
-    }
-    video.play();
+    const videoEl = document.createElement("video");
+    const existingEl = document.getElementById(stream.id);
+    if (existingEl) return;
+
+    console.log("assigned video to stream", this.id, stream);
+
+    videoEl.id = stream.id;
+    videoEl.srcObject = stream;
+
+    videos.append(videoEl);
+
+    videoEl.play();
   }
 }

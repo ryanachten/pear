@@ -37,7 +37,7 @@ namespace api.Hubs
         {
             Console.WriteLine($"\nSendNewPeer: ${peer.Sender}\n");
 
-            await Clients.All.ReceiveNewPeer(peer);
+            await Clients.Others.ReceiveNewPeer(peer);
 
             foreach (var connectionId in ConnectedIds.Where(x => x != Context.ConnectionId))
             {
