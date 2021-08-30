@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  HubConnectionState,
-} from "@microsoft/signalr";
+import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 export const useHubConnection = () => {
   const [connection, setConnection] = useState<HubConnection>();
@@ -24,7 +20,7 @@ export const useHubConnection = () => {
 
   useEffect(() => {
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://localhost:5001/hubs/chat")
+      .withUrl("http://localhost:5000/hubs/chat")
       .withAutomaticReconnect()
       .build();
 

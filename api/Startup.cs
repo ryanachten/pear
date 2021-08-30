@@ -28,7 +28,7 @@ namespace Echo
                 {
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("https://localhost:3000", "https://192.168.86.121:3000")
+                        .WithOrigins("https://localhost:3000", "https://192.168.86.121:3000", "http://localhost:1337")
                         .AllowCredentials();
                 });
             });

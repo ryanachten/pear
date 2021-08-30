@@ -3,10 +3,13 @@ services:
   api:
     build:
       context: ./api
+    environment:
+      ASPNETCORE_URLS: "http://+:5000"
     ports:
+      - "5001:5001"
       - "5000:5000"
   client:
     build:
       context: ./client
     ports:
-      - "3000:3000"
+      - "1337:80"
