@@ -1,3 +1,4 @@
+using System;
 using api.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,8 @@ namespace Echo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var allowedOrigins = Environment.GetEnvironmentVariable("ECHO_ALLOWED_ORGINS");
+
             services.AddControllers();
             services.AddSignalR();
 
@@ -28,7 +31,7 @@ namespace Echo
                 {
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("https://localhost:3000", "https://192.168.86.121:3000", "http://localhost:1337")
+                        .WithOrigins(allowedOrigins)
                         .AllowCredentials();
                 });
             });
