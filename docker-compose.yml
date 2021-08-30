@@ -11,5 +11,7 @@ services:
   client:
     build:
       context: ./client
+    environment:
+      PORT: "80"
     ports:
       - "1337:80"
