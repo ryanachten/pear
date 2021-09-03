@@ -58,7 +58,7 @@ namespace Echo
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
 
-                endpoints.MapHub<ChatHub>("/hubs/chat");
+                endpoints.MapHub<StreamHub>("/hubs/stream");
             });
 
             app.UseSpa(spa =>

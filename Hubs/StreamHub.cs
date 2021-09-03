@@ -1,42 +1,63 @@
-using Echo.Models;
-using Microsoft.AspNetCore.SignalR;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using Echo.Models;
+using Echo.Hubs.Clients;
+using System.Collections.Generic;
+using System;
+
 namespace Echo.Hubs
 {
-    public class StreamHub : Hub
+    public class StreamHub : Hub<IStreamHub>
     {
+        public static HashSet<string> ConnectedIds = new HashSet<string>();
 
-        public async Task NewUser(string username)
+        public override Task OnConnectedAsync()
         {
-            var user = new User()
+            ConnectedIds.Add(Context.ConnectionId);
+
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            ConnectedIds.Remove(Context.ConnectionId);
+            Clients.All.ReceivePeerDisconnected(new SignalRequest()
             {
-                Username = username,
-                ConnectionId = Context.ConnectionId
-            };
-            await Clients.Others.SendAsync("NewUserArrived", JsonSerializer.Serialize(user));
+                Sender = Context.ConnectionId
+            });
+            return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task HelloUser(string username, string recipient)
+        public async Task SendConnected(SignalRequest peer)
         {
-            var user = new User()
+            Console.WriteLine($"\n New peer connected: ${peer.Sender} \n");
+            await Clients.Others.ReceiveNewPeer(peer);
+        }
+
+        public async Task SendMessage(ChatMessage message)
+        {
+            await Clients.All.ReceiveMessage(message);
+        }
+
+        public async Task SendNewInitiator(SignalRequest peer)
+        {
+            Console.WriteLine($"\nSendNewInitiator: ${peer.Sender}\n");
+
+            await Clients.Client(peer.Receiver).ReceiveNewInitiator(peer);
+        }
+
+        //  Send message to client to initiate a connection
+        //  The sender has already setup a peer connection receiver
+        public async Task SendSignal(SignalRequest request)
+        {
+            // sender = connection ID -> receiver = receiver in payload
+            Console.WriteLine($"\nSendSignal: from ${Context.ConnectionId} to ${request.Receiver} ${request.Data.ToString()}\n");
+
+            await Clients.Client(request.Receiver).ReceiveSignal(new SignalRequest
             {
-                Username = username,
-                ConnectionId = Context.ConnectionId
-            };
-            await Clients.Client(recipient).SendAsync("UserSaidHello", JsonSerializer.Serialize(user));
-        }
-
-        public async Task SendSignal(string signal, string recipient)
-        {
-            await Clients.Client(recipient).SendAsync("SendSignal", Context.ConnectionId, signal);
-
-        }
-
-        public override async Task OnDisconnectedAsync(System.Exception exception)
-        {
-            await Clients.All.SendAsync("UserDisconnect", Context.ConnectionId);
-            await base.OnDisconnectedAsync(exception);
+                Sender = Context.ConnectionId,
+                Data = request.Data
+            });
         }
     }
 }

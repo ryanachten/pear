@@ -1,9 +1,15 @@
 # Echo
 
-TODO: write proper readme...
+# Requirements
 
-## Running Docker compose locally
+- .NET CLI v5.0
 
-- Build Docker container: `docker build --build-arg REACT_APP_PROTOCOL="http" --build-arg REACT_APP_ORIGIN="localhost" --build-arg REACT_APP_PORT="8080" -t ryanachten/echo-app .`
+## Running .NET and React locally
 
+- Run while watching for client and API changes: `dotnet run watch`
+
+## Running Docker container locally
+
+- Build Docker container: `docker build -t ryanachten/echo-app .`
 - Run Docker container: `docker run -p 8080:80 ryanachten/echo-app`
+- App should then be accessible on http://localhost:8080

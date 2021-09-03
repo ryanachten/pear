@@ -3,7 +3,7 @@ using Echo.Models;
 
 namespace Echo.Hubs.Clients
 {
-    public interface IChatClient
+    public interface IStreamHub
     {
         Task ReceiveMessage(ChatMessage message);
         Task ReceiveNewPeer(SignalRequest peer);

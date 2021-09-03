@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { Routes } from "./routes";
 
 export const useHubConnection = () => {
   const [connection, setConnection] = useState<HubConnection>();
@@ -21,7 +22,7 @@ export const useHubConnection = () => {
   useEffect(() => {
     const { origin } = window.location;
     const newConnection = new HubConnectionBuilder()
-      .withUrl(`${origin}/hubs/chat`)
+      .withUrl(`${origin}${Routes.StreamHub}`)
       .withAutomaticReconnect()
       .build();
 
