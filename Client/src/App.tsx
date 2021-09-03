@@ -1,4 +1,3 @@
-import React from "react";
 import VideoChat from "./components/VideoChat";
 
 function App() {

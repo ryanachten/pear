@@ -1,10 +1,5 @@
 import { SignalData } from "simple-peer";
 
-export type Message = {
-  user: string;
-  message: string;
-};
-
 export enum SignalEvent {
   SendMessage = "SendMessage",
   SendConnected = "SendConnected",
