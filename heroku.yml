@@ -1,7 +1,4 @@
 build:
-  config:
-    ASPNETCORE_URLS: "http://+:5000"
   docker:
-    web: client/Dockerfile
-    worker: api/Dockerfile
+    web: app/Dockerfile
     
