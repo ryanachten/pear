@@ -1,7 +1,6 @@
 using Echo.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,21 +25,10 @@ namespace Echo
 
             services.AddSignalR();
 
-            // services.AddCors(options =>
-            // {
-            //     options.AddPolicy("ClientPermission", policy =>
-            //     {
-            //         policy.AllowAnyHeader()
-            //             .AllowAnyMethod()
-            //             .WithOrigins("https://localhost:5001")
-            //             .AllowCredentials();
-            //     });
-            // });
-
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
-                configuration.RootPath = "ClientNew/build";
+                configuration.RootPath = "Client/build";
             });
         }
 
@@ -62,8 +50,6 @@ namespace Echo
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            // app.UseCors("ClientPermission");
-
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -77,7 +63,7 @@ namespace Echo
 
             app.UseSpa(spa =>
             {
-                spa.Options.SourcePath = "ClientNew";
+                spa.Options.SourcePath = "Client";
 
                 if (env.IsDevelopment())
                 {

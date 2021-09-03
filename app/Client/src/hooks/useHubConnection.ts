@@ -19,8 +19,9 @@ export const useHubConnection = () => {
   }
 
   useEffect(() => {
+    // TODO: pass port from server
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://localhost:5001/hubs/chat")
+      .withUrl("http://localhost:8080/hubs/chat")
       .withAutomaticReconnect()
       .build();
 
