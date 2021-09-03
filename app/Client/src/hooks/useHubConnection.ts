@@ -19,9 +19,13 @@ export const useHubConnection = () => {
   }
 
   useEffect(() => {
+    const { REACT_APP_PROTOCOL, REACT_APP_ORIGIN, REACT_APP_PORT } =
+      process.env;
     // TODO: pass port from server
     const newConnection = new HubConnectionBuilder()
-      .withUrl("http://localhost:8080/hubs/chat")
+      .withUrl(
+        `${REACT_APP_PROTOCOL}://${REACT_APP_ORIGIN}:${REACT_APP_PORT}/hubs/chat`
+      )
       .withAutomaticReconnect()
       .build();
 
