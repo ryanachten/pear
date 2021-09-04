@@ -11,7 +11,7 @@ const VideoChat = () => {
 
   useEffect(() => {
     signalService.stream && setupSelfVideo(signalService.stream);
-  }, [signalService.connection]);
+  }, [signalService.stream, signalService.connection]);
 
   useEffect(() => {
     document.addEventListener(
@@ -36,7 +36,7 @@ const VideoChat = () => {
         }
       }
     );
-  }, []);
+  }, [peers]);
 
   const createVideo = (peer: SignalPeer) => {
     const videoEl = document.createElement("video");
