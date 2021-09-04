@@ -9,20 +9,13 @@ import {
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
 
-export interface SignalServiceConfig {
-  onCompleteSetup: () => void;
-}
-
 export class SignalService {
   public stream: MediaStream | undefined;
   public connection: HubConnection | undefined;
   public peers: Array<SignalPeer> = [];
-  public initialising: boolean = true;
-  private config: SignalServiceConfig;
 
-  constructor(config: SignalServiceConfig) {
+  constructor() {
     this.init();
-    this.config = config;
   }
 
   private async init() {
@@ -30,8 +23,8 @@ export class SignalService {
     await this.getStream();
     this.registerEventListeners();
 
-    this.initialising = false;
-    this.config.onCompleteSetup();
+    const event = new CustomEvent(SignalServiceEvent.OnServiceReady);
+    document.dispatchEvent(event);
   }
 
   private async initSignalConnection() {
@@ -128,4 +121,7 @@ export class SignalService {
   private getPeerById = (id: string) => this.peers.find((x) => x.id === id);
 }
 
-export const SignalContext = createContext<SignalService | null>(null);
+export const serviceSignalInstance = new SignalService();
+export const SignalContext = createContext<SignalService>(
+  serviceSignalInstance
+);

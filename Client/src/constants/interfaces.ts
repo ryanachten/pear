@@ -13,6 +13,7 @@ export enum SignalEvent {
 }
 
 export enum SignalServiceEvent {
+  OnServiceReady = "OnServiceReady",
   OnPeerStream = "OnPeerStream",
   OnPeerDestroy = "OnPeerDestroy",
 }

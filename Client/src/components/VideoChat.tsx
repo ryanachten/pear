@@ -10,8 +10,8 @@ const VideoChat = () => {
   const [peers, setPeers] = useState<Array<SignalPeer>>([]);
 
   useEffect(() => {
-    signalService?.stream && setupSelfVideo(signalService.stream);
-  }, [signalService?.connection]);
+    signalService.stream && setupSelfVideo(signalService.stream);
+  }, [signalService.connection]);
 
   useEffect(() => {
     document.addEventListener(

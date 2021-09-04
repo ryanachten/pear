@@ -3,27 +3,25 @@ import { Route, BrowserRouter, Switch } from "react-router-dom";
 
 import { LandingPage } from "./pages/LandingPage";
 import { CallPage } from "./pages/CallPage";
-import { SignalContext, SignalService } from "./services/SignalService";
+import { serviceSignalInstance, SignalContext } from "./services/SignalService";
 import { useEffect, useState } from "react";
+import { SignalServiceEvent } from "./constants/interfaces";
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const [signalService, setSignalService] =
-    useState<SignalService | null>(null);
-
   useEffect(() => {
-    const service = new SignalService({
-      onCompleteSetup: () => {
+    document.addEventListener(
+      SignalServiceEvent.OnServiceReady,
+      (e: CustomEventInit) => {
         setLoading(false);
-      },
-    });
-    setSignalService(service);
+      }
+    );
   }, []);
 
   return (
     <Grommet theme={grommet}>
       <BrowserRouter>
-        <SignalContext.Provider value={signalService}>
+        <SignalContext.Provider value={serviceSignalInstance}>
           <Switch>
             <Route exact path="/">
               <LandingPage />
