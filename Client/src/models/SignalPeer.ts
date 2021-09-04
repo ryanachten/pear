@@ -1,6 +1,10 @@
 import { HubConnection } from "@microsoft/signalr";
 import Peer, { Instance } from "simple-peer";
-import { SignalRequest, SignalEvent } from "../constants/interfaces";
+import {
+  SignalRequest,
+  SignalEvent,
+  SignalServiceEvent,
+} from "../constants/interfaces";
 
 export interface SignalPeerConfig {
   id: string;
@@ -13,6 +17,7 @@ export class SignalPeer {
   public id: string;
   public instance: Instance;
   private connection: HubConnection;
+  public stream: MediaStream | undefined = undefined;
 
   constructor(config: SignalPeerConfig) {
     const { id, connection, initiator, stream } = config;
@@ -39,27 +44,12 @@ export class SignalPeer {
     );
 
     // When a peer receives a stream event, setup video playback
-    this.instance.on("stream", (stream) => this.initVideoPlayback(stream));
-  }
-
-  private initVideoPlayback(stream: MediaStream) {
-    const videos = document.querySelector(".videos");
-
-    if (videos === null) {
-      return console.error("No video element found");
-    }
-
-    const videoEl = document.createElement("video");
-    const existingEl = document.getElementById(stream.id);
-    if (existingEl) return;
-
-    console.log("assigned video to stream", this.id, stream);
-
-    videoEl.id = this.id;
-    videoEl.srcObject = stream;
-
-    videos.append(videoEl);
-
-    videoEl.play();
+    this.instance.on("stream", (stream) => {
+      this.stream = stream;
+      const event = new CustomEvent(SignalServiceEvent.OnPeerStream, {
+        detail: this,
+      });
+      document.dispatchEvent(event);
+    });
   }
 }

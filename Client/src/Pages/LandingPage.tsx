@@ -8,7 +8,7 @@ import {
   TextInput,
 } from "grommet";
 import { useHistory } from "react-router";
-import { Routes } from "../hooks/routes";
+import { Routes } from "../constants/routes";
 
 enum CallOpt {
   Existing = "Join an existing call",

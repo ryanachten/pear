@@ -1,87 +1,50 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  SignalEvent,
-  SignalRequest,
-  SignalResponse,
-} from "../constants/interfaces";
-import { useHubConnection } from "../hooks/useHubConnection";
+import { useContext, useEffect, useRef, useState } from "react";
+import { SignalServiceEvent } from "../constants/interfaces";
 import { SignalPeer } from "../models/SignalPeer";
-
-let peers: Record<string, SignalPeer> = {};
-const setPeers = (newPeers: Record<string, SignalPeer>) => {
-  peers = newPeers;
-};
+import { SignalContext } from "../services/SignalService";
 
 const VideoChat = () => {
-  const connection = useHubConnection();
   const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
-  const [isRegistered, setRegistered] = useState(false);
+  const signalService = useContext(SignalContext);
+  const [peers, setPeers] = useState<Array<SignalPeer>>([]);
 
   useEffect(() => {
-    init();
-  }, [connection, connection?.connectionId, isRegistered]);
+    signalService?.stream && setupSelfVideo(signalService.stream);
+  }, [signalService?.connection]);
 
-  const init = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      // audio: true,
-    });
-    if (connection && connection.connectionId && !isRegistered) {
-      setupSelfVideo(stream);
-
-      // // Set peer ID to signalR connection ID
-      const peerId = connection.connectionId;
-      console.log("peerId", peerId);
-
-      connection.send(SignalEvent.SendConnected, {
-        sender: peerId,
-      });
-
-      connection.on(SignalEvent.ReceiveNewPeer, (peer: SignalRequest) => {
-        const newPeer = new SignalPeer({
-          id: peer.sender,
-          connection,
-          stream,
-        });
-        setPeers({ ...peers, [peer.sender]: newPeer });
-        console.log("new peer!", peer, "total peers", peers);
-
-        connection.send(SignalEvent.SendNewInitiator, {
-          sender: peerId,
-          receiver: peer.sender,
-        } as SignalRequest);
-      });
-
-      connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
-        console.log("new initiator!", peer);
-        const newPeer = new SignalPeer({
-          id: peer.sender,
-          initiator: true,
-          connection,
-          stream,
-        });
-        setPeers({ ...peers, [peer.sender]: newPeer });
-      });
-
-      // When we receive a signal from signalR, we apply to peer
-      connection.on(SignalEvent.ReceiveSignal, (signal: SignalResponse) =>
-        peers[signal.sender].instance.signal(signal.data)
-      );
-
-      connection.on(
-        SignalEvent.ReceivePeerDisconnected,
-        (peer: SignalRequest) => {
-          const updatedPeers = { ...peers };
-          updatedPeers[peer.sender].instance.destroy();
-          videosEl.current?.querySelector(`#${peer.sender}`)?.remove();
-          delete updatedPeers[peer.sender];
-          setPeers({ ...updatedPeers });
-          console.log("peer disconnected!", peer, "total peers", peers);
+  useEffect(() => {
+    document.addEventListener(
+      SignalServiceEvent.OnPeerStream,
+      (e: CustomEventInit<SignalPeer>) => {
+        const peer = e.detail;
+        if (peer) {
+          createVideo(peer);
+          setPeers([...peers, peer]);
         }
-      );
+      }
+    );
 
-      setRegistered(true);
+    document.addEventListener(
+      SignalServiceEvent.OnPeerDestroy,
+      (e: CustomEventInit<SignalPeer>) => {
+        const peer = e.detail;
+        if (peer) {
+          videosEl.current?.querySelector(`#${peer.id}`)?.remove();
+          const newPeers = [...peers].filter((x) => x.id !== peer.id);
+          setPeers(newPeers);
+        }
+      }
+    );
+  }, []);
+
+  const createVideo = (peer: SignalPeer) => {
+    const videoEl = document.createElement("video");
+    videoEl.id = peer.id;
+    if (peer.stream) {
+      videoEl.srcObject = peer.stream;
+      videosEl.current?.append(videoEl);
+      videoEl.play();
     }
   };
 

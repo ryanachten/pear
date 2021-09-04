@@ -12,6 +12,11 @@ export enum SignalEvent {
   ReceivePeerDisconnected = "ReceivePeerDisconnected",
 }
 
+export enum SignalServiceEvent {
+  OnPeerStream = "OnPeerStream",
+  OnPeerDestroy = "OnPeerDestroy",
+}
+
 export interface SignalRequest {
   sender: string;
   receiver: string;
