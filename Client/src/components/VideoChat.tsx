@@ -1,7 +1,10 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { Grid } from "grommet";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { SignalServiceEvent } from "../constants/interfaces";
 import { SignalPeer } from "../models/SignalPeer";
 import { SignalContext } from "../services/SignalService";
+
+import "./VideoChat.css";
 
 const VideoChat = () => {
   const videosEl = useRef<HTMLDivElement>(null);
@@ -14,34 +17,39 @@ const VideoChat = () => {
   }, [signalService.stream, signalService.connection]);
 
   useEffect(() => {
-    document.addEventListener(
-      SignalServiceEvent.OnPeerStream,
-      (e: CustomEventInit<SignalPeer>) => {
-        const peer = e.detail;
-        if (peer) {
-          createVideo(peer);
-          setPeers([...peers, peer]);
-        }
+    const addPeer = (e: CustomEventInit<SignalPeer>) => {
+      const peer = e.detail;
+      if (peer) {
+        createVideo(peer);
+        setPeers([...peers, peer]);
       }
-    );
+    };
+    document.addEventListener(SignalServiceEvent.OnPeerStream, addPeer);
 
-    document.addEventListener(
-      SignalServiceEvent.OnPeerDestroy,
-      (e: CustomEventInit<SignalPeer>) => {
-        const peer = e.detail;
-        if (peer) {
-          videosEl.current?.querySelector(`#${peer.id}`)?.remove();
-          const newPeers = [...peers].filter((x) => x.id !== peer.id);
-          setPeers(newPeers);
-        }
+    const removePeer = (e: CustomEventInit<SignalPeer>) => {
+      const peer = e.detail;
+      if (peer) {
+        videosEl.current?.querySelector(`#${peer.id}`)?.remove();
+        const newPeers = [...peers].filter((x) => x.id !== peer.id);
+        setPeers(newPeers);
       }
-    );
+    };
+    document.addEventListener(SignalServiceEvent.OnPeerDestroy, removePeer);
+
+    return () => {
+      document.removeEventListener(SignalServiceEvent.OnPeerStream, addPeer);
+      document.removeEventListener(
+        SignalServiceEvent.OnPeerDestroy,
+        removePeer
+      );
+    };
   }, [peers]);
 
   const createVideo = (peer: SignalPeer) => {
     const videoEl = document.createElement("video");
     videoEl.id = peer.id;
     if (peer.stream) {
+      videoEl.className = "VideoChat__Element";
       videoEl.srcObject = peer.stream;
       videosEl.current?.append(videoEl);
       videoEl.play();
@@ -56,8 +64,8 @@ const VideoChat = () => {
   };
 
   return (
-    <div ref={videosEl} className="videos">
-      <video ref={selfVideoEl} id="video-self" />
+    <div className="VideoChat__Grid" ref={videosEl}>
+      <video ref={selfVideoEl} className="VideoChat__Element" />
     </div>
   );
 };
