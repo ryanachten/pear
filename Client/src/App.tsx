@@ -4,20 +4,12 @@ import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { LandingPage } from "./pages/LandingPage";
 import { CallPage } from "./pages/CallPage";
 import { serviceSignalInstance, SignalContext } from "./services/SignalService";
-import { useEffect, useState } from "react";
-import { SignalServiceEvent } from "./constants/interfaces";
 import { LoadingPage } from "./pages/LoadingPage";
+import { useSelector } from "react-redux";
+import { isServiceLoading } from "./selectors/peerSelectors";
 
 function App() {
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    document.addEventListener(
-      SignalServiceEvent.OnServiceReady,
-      (e: CustomEventInit) => {
-        setLoading(false);
-      }
-    );
-  }, []);
+  const loading = useSelector(isServiceLoading);
 
   return (
     <Grommet theme={grommet}>

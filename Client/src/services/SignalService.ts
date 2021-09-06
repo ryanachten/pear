@@ -4,15 +4,17 @@ import {
   SignalEvent,
   SignalRequest,
   SignalResponse,
-  SignalServiceEvent,
 } from "../constants/interfaces";
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
+import { removePeer, serviceIsReady } from "../reducers/peerSlice";
+import { store } from "../reducers/store";
 
 export class SignalService {
   public stream: MediaStream | undefined;
   public connection: HubConnection | undefined;
   public peers: Array<SignalPeer> = [];
+  private loggingEnabled: boolean = false;
 
   constructor() {
     this.init();
@@ -23,8 +25,7 @@ export class SignalService {
     await this.getStream();
     this.registerEventListeners();
 
-    const event = new CustomEvent(SignalServiceEvent.OnServiceReady);
-    document.dispatchEvent(event);
+    store.dispatch(serviceIsReady());
   }
 
   private async initSignalConnection() {
@@ -49,9 +50,9 @@ export class SignalService {
   private registerEventListeners() {
     if (this.connection && this.connection.connectionId) {
       const connection = this.connection as HubConnection;
-      // // Set peer ID to signalR connection ID
+      // Set peer ID to signalR connection ID
       const peerId = this.connection.connectionId;
-      console.log("peerId", peerId);
+      this.log("peerId", peerId);
 
       connection.send(SignalEvent.SendConnected, {
         sender: peerId,
@@ -64,7 +65,7 @@ export class SignalService {
           stream: this.stream,
         });
         this.addPeer(newPeer);
-        console.log("new peer!", peer, "total peers", this.peers);
+        this.log("new peer", peer);
 
         connection.send(SignalEvent.SendNewInitiator, {
           sender: peerId,
@@ -73,7 +74,7 @@ export class SignalService {
       });
 
       connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
-        console.log("new initiator!", peer);
+        this.log("new initiator", peer);
         const newPeer = new SignalPeer({
           id: peer.sender,
           initiator: true,
@@ -94,10 +95,6 @@ export class SignalService {
           const peer = this.getPeerById(request.sender);
           if (peer) {
             this.destroyPeer(peer);
-            const event = new CustomEvent(SignalServiceEvent.OnPeerDestroy, {
-              detail: peer,
-            });
-            document.dispatchEvent(event);
           }
         }
       );
@@ -116,9 +113,13 @@ export class SignalService {
   private destroyPeer = (peer: SignalPeer) => {
     peer.instance.destroy();
     this.peers = [...this.peers].filter((x) => x.id !== peer.id);
+    store.dispatch(removePeer(peer.id));
   };
 
   private getPeerById = (id: string) => this.peers.find((x) => x.id === id);
+
+  private log = (...args: any[]) =>
+    this.loggingEnabled && console.log(`SignalService:\n`, ...args);
 }
 
 export const serviceSignalInstance = new SignalService();

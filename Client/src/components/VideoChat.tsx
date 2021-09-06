@@ -1,7 +1,7 @@
-import { Grid } from "grommet";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { SignalServiceEvent } from "../constants/interfaces";
+import { useSelector } from "react-redux";
 import { SignalPeer } from "../models/SignalPeer";
+import { getPeers } from "../selectors/peerSelectors";
 import { SignalContext } from "../services/SignalService";
 
 import "./VideoChat.css";
@@ -10,40 +10,31 @@ const VideoChat = () => {
   const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
-  const [peers, setPeers] = useState<Array<SignalPeer>>([]);
+  const peerIds = useSelector(getPeers);
+  const [peersVideos, setPeersVideos] = useState<Array<string>>([]);
 
   useEffect(() => {
     signalService.stream && setupSelfVideo(signalService.stream);
-  }, [signalService.stream, signalService.connection]);
+  }, [signalService.stream]);
 
   useEffect(() => {
-    const addPeer = (e: CustomEventInit<SignalPeer>) => {
-      const peer = e.detail;
-      if (peer) {
-        createVideo(peer);
-        setPeers([...peers, peer]);
-      }
-    };
-    document.addEventListener(SignalServiceEvent.OnPeerStream, addPeer);
+    const peersNeedingVideos = signalService.peers.filter(
+      (x) => !peersVideos.includes(x.id)
+    );
+    const peersNeedingRemoval = peersVideos.filter(
+      (id) => !signalService.peers.find((x) => x.id === id)
+    );
 
-    const removePeer = (e: CustomEventInit<SignalPeer>) => {
-      const peer = e.detail;
-      if (peer) {
-        videosEl.current?.querySelector(`#${peer.id}`)?.remove();
-        const newPeers = [...peers].filter((x) => x.id !== peer.id);
-        setPeers(newPeers);
-      }
-    };
-    document.addEventListener(SignalServiceEvent.OnPeerDestroy, removePeer);
+    peersNeedingVideos.forEach((peer) => {
+      createVideo(peer);
+      setPeersVideos([...peersVideos, peer.id]);
+    });
 
-    return () => {
-      document.removeEventListener(SignalServiceEvent.OnPeerStream, addPeer);
-      document.removeEventListener(
-        SignalServiceEvent.OnPeerDestroy,
-        removePeer
-      );
-    };
-  }, [peers]);
+    peersNeedingRemoval.forEach((peerId) => {
+      videosEl.current?.querySelector(`#${peerId}`)?.remove();
+      setPeersVideos(peersVideos.filter((x) => x !== peerId));
+    });
+  }, [signalService.peers, peerIds, peersVideos]);
 
   const createVideo = (peer: SignalPeer) => {
     const videoEl = document.createElement("video");

@@ -1,10 +1,8 @@
 import { HubConnection } from "@microsoft/signalr";
 import Peer, { Instance } from "simple-peer";
-import {
-  SignalRequest,
-  SignalEvent,
-  SignalServiceEvent,
-} from "../constants/interfaces";
+import { SignalRequest, SignalEvent } from "../constants/interfaces";
+import { addPeer } from "../reducers/peerSlice";
+import { store } from "../reducers/store";
 
 export interface SignalPeerConfig {
   id: string;
@@ -33,9 +31,6 @@ export class SignalPeer {
 
   private registerEventListeners() {
     // When peer receives a signal, transmit it via signalR
-    this.instance.on("connect", () => console.log("Peer connected", this.id));
-
-    // When peer receives a signal, transmit it via signalR
     this.instance.on("signal", (data) =>
       this.connection.send(SignalEvent.SendSignal, {
         receiver: this.id,
@@ -46,10 +41,7 @@ export class SignalPeer {
     // When a peer receives a stream event, setup video playback
     this.instance.on("stream", (stream) => {
       this.stream = stream;
-      const event = new CustomEvent(SignalServiceEvent.OnPeerStream, {
-        detail: this,
-      });
-      document.dispatchEvent(event);
+      store.dispatch(addPeer(this.id));
     });
   }
 }
