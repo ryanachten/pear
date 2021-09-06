@@ -18,8 +18,23 @@ export interface SignalRequest {
   data: object;
 }
 
+export interface NewUserRequest {
+  sender: string;
+  receiver: string;
+  data: PeerUserMetadata;
+}
+
 export interface SignalResponse {
   sender: string;
   receiver: string;
   data: SignalData;
+}
+
+export interface PeerUserMetadata {
+  username: string;
+}
+
+export interface PeerDisplay {
+  connectionId: string;
+  user: PeerUserMetadata;
 }
