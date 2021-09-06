@@ -1,13 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { PeerDisplay } from "../constants/interfaces";
 
 export interface PeerState {
   serviceReady: boolean;
-  peerIds: Array<string>;
+  peers: Array<PeerDisplay>;
 }
 
 const initialState: PeerState = {
   serviceReady: false,
-  peerIds: [],
+  peers: [],
 };
 
 export const peerSlice = createSlice({
@@ -17,18 +18,22 @@ export const peerSlice = createSlice({
     serviceIsReady: (state) => {
       state.serviceReady = true;
     },
-    addPeer: (state, action: PayloadAction<string>) => {
-      let peers = [...state.peerIds];
-      const peerId = action.payload;
-      const existingPeer = peers.find((x) => x === peerId);
+    addPeer: (state, action: PayloadAction<PeerDisplay>) => {
+      let peers = [...state.peers];
+      const newPeer = action.payload;
+      const existingPeer = peers.find(
+        (x) => x.connectionId === newPeer.connectionId
+      );
       if (!existingPeer) {
-        peers.push(peerId);
+        peers.push(newPeer);
       }
-      state.peerIds = peers;
+      state.peers = peers;
     },
     removePeer: (state, action: PayloadAction<string>) => {
-      const peers = state.peerIds.filter((x) => x !== action.payload);
-      state.peerIds = peers;
+      const peers = state.peers.filter(
+        (x) => x.connectionId !== action.payload
+      );
+      state.peers = peers;
     },
   },
 });

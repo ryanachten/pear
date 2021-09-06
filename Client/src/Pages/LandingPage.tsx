@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Button,
   Form,
@@ -7,8 +7,11 @@ import {
   RadioButtonGroup,
   TextInput,
 } from "grommet";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 import { Routes } from "../constants/routes";
+import { updateUsername } from "../reducers/userSlice";
+import { SignalContext } from "../services/SignalService";
 
 enum CallOpt {
   Existing = "Join an existing call",
@@ -16,14 +19,27 @@ enum CallOpt {
 }
 
 export const LandingPage = () => {
+  const dispatch = useDispatch();
   const history = useHistory();
+  const signalService = useContext(SignalContext);
+  const [username, setUsername] = useState<string>("");
   const [callSetting, setCallSetting] = useState<CallOpt>(CallOpt.New);
-  const onSubmit = () => history.push(Routes.CallPage);
+  const onSubmit = () => {
+    dispatch(updateUsername(username));
+    signalService.SendConnection();
+    history.push(Routes.CallPage);
+  };
   return (
-    <Form>
+    <Form onSubmit={onSubmit}>
       <Heading>echo</Heading>
       <FormField name="name" htmlFor="name-input" label="Name">
-        <TextInput id="name-input" name="name" placeholder="Enter a username" />
+        <TextInput
+          id="name-input"
+          name="name"
+          placeholder="Enter a username"
+          value={username}
+          onChange={(e) => setUsername(e.currentTarget.value)}
+        />
       </FormField>
       <FormField name="join a call" htmlFor="join-call" label="Join a call">
         <RadioButtonGroup

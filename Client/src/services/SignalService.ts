@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { createContext } from "react";
 import {
+  NewUserRequest,
   SignalEvent,
   SignalRequest,
   SignalResponse,
@@ -18,6 +19,17 @@ export class SignalService {
 
   constructor() {
     this.init();
+  }
+
+  public SendConnection() {
+    if (this.connection) {
+      this.connection.send(SignalEvent.SendConnected, {
+        sender: this.connection.connectionId,
+        data: {
+          username: store.getState().user.username,
+        },
+      } as NewUserRequest);
+    }
   }
 
   private async init() {
@@ -54,15 +66,12 @@ export class SignalService {
       const peerId = this.connection.connectionId;
       this.log("peerId", peerId);
 
-      connection.send(SignalEvent.SendConnected, {
-        sender: peerId,
-      });
-
-      connection.on(SignalEvent.ReceiveNewPeer, (peer: SignalRequest) => {
+      connection.on(SignalEvent.ReceiveNewPeer, (peer: NewUserRequest) => {
         const newPeer = new SignalPeer({
           id: peer.sender,
           connection,
           stream: this.stream,
+          userMetadata: peer.data,
         });
         this.addPeer(newPeer);
         this.log("new peer", peer);
@@ -70,16 +79,20 @@ export class SignalService {
         connection.send(SignalEvent.SendNewInitiator, {
           sender: peerId,
           receiver: peer.sender,
-        } as SignalRequest);
+          data: {
+            username: store.getState().user.username,
+          },
+        } as NewUserRequest);
       });
 
-      connection.on(SignalEvent.ReceiveNewInitiator, (peer: SignalRequest) => {
+      connection.on(SignalEvent.ReceiveNewInitiator, (peer: NewUserRequest) => {
         this.log("new initiator", peer);
         const newPeer = new SignalPeer({
           id: peer.sender,
           initiator: true,
           connection,
           stream: this.stream,
+          userMetadata: peer.data,
         });
         this.addPeer(newPeer);
       });

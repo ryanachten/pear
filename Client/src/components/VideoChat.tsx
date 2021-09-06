@@ -2,16 +2,18 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { SignalPeer } from "../models/SignalPeer";
 import { getPeers } from "../selectors/peerSelectors";
+import { getUsername } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
 
 import "./VideoChat.css";
 
 const VideoChat = () => {
+  const [peersVideos, setPeersVideos] = useState<Array<string>>([]);
   const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
   const peerIds = useSelector(getPeers);
-  const [peersVideos, setPeersVideos] = useState<Array<string>>([]);
+  const username = useSelector(getUsername);
 
   useEffect(() => {
     signalService.stream && setupSelfVideo(signalService.stream);
@@ -37,12 +39,17 @@ const VideoChat = () => {
   }, [signalService.peers, peerIds, peersVideos]);
 
   const createVideo = (peer: SignalPeer) => {
+    const videoWrapper = document.createElement("div");
+    const videoTitle = document.createElement("p");
+    videoTitle.innerText = peer.userMetadata.username || peer.id;
     const videoEl = document.createElement("video");
-    videoEl.id = peer.id;
+    videoWrapper.id = peer.id;
+    videoWrapper.append(videoTitle);
+    videoWrapper.append(videoEl);
     if (peer.stream) {
       videoEl.className = "VideoChat__Element";
       videoEl.srcObject = peer.stream;
-      videosEl.current?.append(videoEl);
+      videosEl.current?.append(videoWrapper);
       videoEl.play();
     }
   };
@@ -56,7 +63,10 @@ const VideoChat = () => {
 
   return (
     <div className="VideoChat__Grid" ref={videosEl}>
-      <video ref={selfVideoEl} className="VideoChat__Element" />
+      <div>
+        <p>{username}</p>
+        <video ref={selfVideoEl} className="VideoChat__Element" />
+      </div>
     </div>
   );
 };
