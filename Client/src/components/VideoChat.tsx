@@ -1,58 +1,45 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
-import { SignalPeer } from "../models/SignalPeer";
 import { getPeers } from "../selectors/peerSelectors";
 import { getUsername } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
 
 import "./VideoChat.css";
+import { VideoPlayer } from "./VideoPlayer";
 
 const VideoChat = () => {
-  const [peersVideos, setPeersVideos] = useState<Array<string>>([]);
   const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
-  const peerIds = useSelector(getPeers);
+  const peers = useSelector(getPeers);
   const username = useSelector(getUsername);
+
+  useEffect(() => {
+    signalService.SendConnection();
+  }, [signalService]);
 
   useEffect(() => {
     signalService.stream && setupSelfVideo(signalService.stream);
   }, [signalService.stream]);
 
-  useEffect(() => {
-    const peersNeedingVideos = signalService.peers.filter(
-      (x) => !peersVideos.includes(x.id)
-    );
-    const peersNeedingRemoval = peersVideos.filter(
-      (id) => !signalService.peers.find((x) => x.id === id)
-    );
-
-    peersNeedingVideos.forEach((peer) => {
-      createVideo(peer);
-      setPeersVideos([...peersVideos, peer.id]);
+  const PeerVideos = useMemo(() => {
+    const videos = signalService.peers.map((x) => {
+      return (
+        <VideoPlayer
+          key={x.id}
+          subtitle={x.userMetadata.username || x.id}
+          videoRef={(ref) => {
+            // Only configure stream if src hasn't alread been set
+            if (ref && !ref.srcObject && x.stream) {
+              ref.srcObject = x.stream;
+              ref.play();
+            }
+          }}
+        />
+      );
     });
-
-    peersNeedingRemoval.forEach((peerId) => {
-      videosEl.current?.querySelector(`#${peerId}`)?.remove();
-      setPeersVideos(peersVideos.filter((x) => x !== peerId));
-    });
-  }, [signalService.peers, peerIds, peersVideos]);
-
-  const createVideo = (peer: SignalPeer) => {
-    const videoWrapper = document.createElement("div");
-    const videoTitle = document.createElement("p");
-    videoTitle.innerText = peer.userMetadata.username || peer.id;
-    const videoEl = document.createElement("video");
-    videoWrapper.id = peer.id;
-    videoWrapper.append(videoTitle);
-    videoWrapper.append(videoEl);
-    if (peer.stream) {
-      videoEl.className = "VideoChat__Element";
-      videoEl.srcObject = peer.stream;
-      videosEl.current?.append(videoWrapper);
-      videoEl.play();
-    }
-  };
+    return videos;
+  }, [peers]);
 
   const setupSelfVideo = (stream: MediaStream) => {
     if (selfVideoEl.current) {
@@ -63,10 +50,8 @@ const VideoChat = () => {
 
   return (
     <div className="VideoChat__Grid" ref={videosEl}>
-      <div>
-        <p>{username}</p>
-        <video ref={selfVideoEl} className="VideoChat__Element" />
-      </div>
+      <VideoPlayer subtitle={username} videoRef={selfVideoEl} />
+      {PeerVideos}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import {
   Button,
   Form,
@@ -11,7 +11,6 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 import { Routes } from "../constants/routes";
 import { updateUsername } from "../reducers/userSlice";
-import { SignalContext } from "../services/SignalService";
 
 enum CallOpt {
   Existing = "Join an existing call",
@@ -21,12 +20,10 @@ enum CallOpt {
 export const LandingPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const signalService = useContext(SignalContext);
   const [username, setUsername] = useState<string>("");
   const [callSetting, setCallSetting] = useState<CallOpt>(CallOpt.New);
   const onSubmit = () => {
     dispatch(updateUsername(username));
-    signalService.SendConnection();
     history.push(Routes.CallPage);
   };
   return (
