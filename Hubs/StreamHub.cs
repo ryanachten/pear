@@ -64,10 +64,10 @@ namespace Echo.Hubs
             });
         }
 
-        public async Task SendConnected(SignalRequest peer)
+        public async Task SendConnected(PeerConnectionRequest peer)
         {
             Console.WriteLine($"\n New peer connected: ${peer.Sender} \n");
-            await Clients.Others.ReceiveNewPeer(peer);
+            await Clients.OthersInGroup(peer.GroupCode).ReceiveNewPeer(peer);
         }
 
         public async Task SendMessage(ChatMessage message)

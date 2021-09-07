@@ -33,6 +33,12 @@ export interface NewUserRequest {
   data: PeerUserMetadata;
 }
 
+export interface ConnectedRequest {
+  sender: string;
+  groupCode: string;
+  data: PeerUserMetadata;
+}
+
 export interface SignalResponse {
   sender: string;
   receiver: string;

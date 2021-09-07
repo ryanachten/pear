@@ -7,7 +7,7 @@ namespace Echo.Hubs.Clients
     {
         Task ReceiveMessage(ChatMessage message);
         Task ReceivePeerGroup(PeerGroupRequest group);
-        Task ReceiveNewPeer(SignalRequest peer);
+        Task ReceiveNewPeer(PeerConnectionRequest peer);
         Task ReceiveNewInitiator(SignalRequest peer);
         Task ReceiveSignal(SignalRequest stream);
         Task ReceivePeerDisconnected(SignalRequest peer);

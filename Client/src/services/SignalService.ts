@@ -6,6 +6,7 @@ import {
   SignalEvent,
   SignalRequest,
   SignalResponse,
+  ConnectedRequest,
 } from "../constants/interfaces";
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
@@ -15,6 +16,7 @@ import { store } from "../reducers/store";
 export class SignalService {
   public stream: MediaStream | undefined;
   public connection: HubConnection | undefined;
+  public groupCode: string | undefined;
   public peers: Array<SignalPeer> = [];
   private loggingEnabled: boolean = false;
 
@@ -48,10 +50,11 @@ export class SignalService {
     if (this.connection) {
       this.connection.send(SignalEvent.SendConnected, {
         sender: this.connection.connectionId,
+        groupCode: this.groupCode,
         data: {
           userName: store.getState().user.userName,
         },
-      } as NewUserRequest);
+      } as ConnectedRequest);
     }
   }
 
@@ -91,7 +94,10 @@ export class SignalService {
 
       connection.on(
         SignalEvent.ReceivePeerGroup,
-        (response: PeerGroupRequest) => store.dispatch(addGroup(response.data))
+        (response: PeerGroupRequest) => {
+          this.groupCode = response.data.groupCode;
+          store.dispatch(addGroup(response.data));
+        }
       );
 
       connection.on(SignalEvent.ReceiveNewPeer, (peer: NewUserRequest) => {
