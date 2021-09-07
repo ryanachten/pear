@@ -28,6 +28,24 @@ namespace Echo.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
+        public async Task SendNewGroup(PeerGroupRequest request)
+        {
+            Console.WriteLine($"\n New group received: ${request.Sender} \n");
+
+            var groupCode = new GroupCode().Value;
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupCode);
+
+            await Clients.Caller.ReceivePeerGroup(new PeerGroupRequest()
+            {
+                Sender = request.Sender,
+                Data = new PeerGroup()
+                {
+                    GroupName = request.Data.GroupName,
+                    GroupCode = groupCode
+                }
+            });
+        }
+
         public async Task SendConnected(SignalRequest peer)
         {
             Console.WriteLine($"\n New peer connected: ${peer.Sender} \n");

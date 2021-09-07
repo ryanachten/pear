@@ -1,14 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PeerDisplay } from "../constants/interfaces";
+import { PeerGroupMetadata, PeerDisplay } from "../constants/interfaces";
 
 export interface PeerState {
   serviceReady: boolean;
   peers: Array<PeerDisplay>;
+  group: PeerGroupMetadata | null;
 }
 
 const initialState: PeerState = {
   serviceReady: false,
   peers: [],
+  group: null,
 };
 
 export const peerSlice = createSlice({
@@ -17,6 +19,9 @@ export const peerSlice = createSlice({
   reducers: {
     serviceIsReady: (state) => {
       state.serviceReady = true;
+    },
+    addGroup: (state, action: PayloadAction<PeerGroupMetadata>) => {
+      state.group = action.payload;
     },
     addPeer: (state, action: PayloadAction<PeerDisplay>) => {
       let peers = [...state.peers];
@@ -38,6 +43,7 @@ export const peerSlice = createSlice({
   },
 });
 
-export const { serviceIsReady, addPeer, removePeer } = peerSlice.actions;
+export const { serviceIsReady, addPeer, addGroup, removePeer } =
+  peerSlice.actions;
 
 export default peerSlice.reducer;

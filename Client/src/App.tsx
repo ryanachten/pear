@@ -1,11 +1,11 @@
 import { Grommet, grommet } from "grommet";
+import { useSelector } from "react-redux";
 import { Route, BrowserRouter, Switch } from "react-router-dom";
 
 import { LandingPage } from "./pages/LandingPage";
 import { CallPage } from "./pages/CallPage";
 import { serviceSignalInstance, SignalContext } from "./services/SignalService";
 import { LoadingPage } from "./pages/LoadingPage";
-import { useSelector } from "react-redux";
 import { isServiceLoading } from "./selectors/peerSelectors";
 
 function App() {

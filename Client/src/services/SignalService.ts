@@ -1,6 +1,7 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { createContext } from "react";
 import {
+  PeerGroupRequest,
   NewUserRequest,
   SignalEvent,
   SignalRequest,
@@ -8,7 +9,7 @@ import {
 } from "../constants/interfaces";
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
-import { removePeer, serviceIsReady } from "../reducers/peerSlice";
+import { addGroup, removePeer, serviceIsReady } from "../reducers/peerSlice";
 import { store } from "../reducers/store";
 
 export class SignalService {
@@ -21,12 +22,23 @@ export class SignalService {
     this.init();
   }
 
+  public SendNewGroup(groupName: string) {
+    if (this.connection) {
+      this.connection.send(SignalEvent.SendNewGroup, {
+        sender: this.connection.connectionId,
+        data: {
+          groupName,
+        },
+      } as PeerGroupRequest);
+    }
+  }
+
   public SendConnection() {
     if (this.connection) {
       this.connection.send(SignalEvent.SendConnected, {
         sender: this.connection.connectionId,
         data: {
-          username: store.getState().user.username,
+          userName: store.getState().user.userName,
         },
       } as NewUserRequest);
     }
@@ -66,6 +78,11 @@ export class SignalService {
       const peerId = this.connection.connectionId;
       this.log("peerId", peerId);
 
+      connection.on(
+        SignalEvent.ReceivePeerGroup,
+        (response: PeerGroupRequest) => store.dispatch(addGroup(response.data))
+      );
+
       connection.on(SignalEvent.ReceiveNewPeer, (peer: NewUserRequest) => {
         const newPeer = new SignalPeer({
           id: peer.sender,
@@ -80,7 +97,7 @@ export class SignalService {
           sender: peerId,
           receiver: peer.sender,
           data: {
-            username: store.getState().user.username,
+            userName: store.getState().user.userName,
           },
         } as NewUserRequest);
       });
