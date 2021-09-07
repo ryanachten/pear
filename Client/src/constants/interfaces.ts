@@ -8,6 +8,7 @@ export enum SignalEvent {
   SendNewInitiator = "SendNewInitiator",
   SendSignal = "SendSignal",
   ReceiveMessage = "ReceiveMessage",
+  ReceivePeerGroupNotFound = "ReceivePeerGroupNotFound",
   ReceivePeerGroup = "ReceivePeerGroup",
   ReceiveNewPeer = "ReceiveNewPeer",
   ReceiveNewInitiator = "ReceiveNewInitiator",

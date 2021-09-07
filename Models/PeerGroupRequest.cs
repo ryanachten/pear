@@ -4,5 +4,11 @@ namespace Echo.Models
     {
         public string Sender { get; set; }
         public PeerGroup Data { get; set; }
+
+        public PeerGroupRequest(string sender, PeerGroup data)
+        {
+            Sender = sender;
+            Data = data;
+        }
     }
 }

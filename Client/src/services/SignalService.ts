@@ -10,7 +10,12 @@ import {
 } from "../constants/interfaces";
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
-import { addGroup, removePeer, serviceIsReady } from "../reducers/peerSlice";
+import {
+  addGroup,
+  removePeer,
+  serviceIsReady,
+  setGroupError,
+} from "../reducers/peerSlice";
 import { store } from "../reducers/store";
 
 export class SignalService {
@@ -97,6 +102,15 @@ export class SignalService {
         (response: PeerGroupRequest) => {
           this.groupCode = response.data.groupCode;
           store.dispatch(addGroup(response.data));
+        }
+      );
+
+      connection.on(
+        SignalEvent.ReceivePeerGroupNotFound,
+        (response: PeerGroupRequest) => {
+          store.dispatch(
+            setGroupError(`Call with code ${response.data.groupCode} not found`)
+          );
         }
       );
 
