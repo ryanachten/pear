@@ -1,6 +1,7 @@
 import { Grommet, grommet } from "grommet";
+import React from "react";
 import { useSelector } from "react-redux";
-import { Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Switch, Redirect } from "react-router-dom";
 
 import { LandingPage } from "./pages/LandingPage";
 import { CallPage } from "./pages/CallPage";
@@ -22,9 +23,10 @@ function App() {
               <Route exact path="/">
                 <LandingPage />
               </Route>
-              <Route exact path="/call">
+              <Route exact path="/call/:groupCode">
                 <CallPage />
               </Route>
+              <Redirect to="/" />
             </Switch>
           )}
         </SignalContext.Provider>

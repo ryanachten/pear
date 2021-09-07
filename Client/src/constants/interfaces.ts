@@ -3,6 +3,7 @@ import { SignalData } from "simple-peer";
 export enum SignalEvent {
   SendMessage = "SendMessage",
   SendNewGroup = "SendNewGroup",
+  SendAddToGroup = "SendAddToGroup",
   SendConnected = "SendConnected",
   SendNewInitiator = "SendNewInitiator",
   SendSignal = "SendSignal",

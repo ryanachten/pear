@@ -25,24 +25,32 @@ export const LandingPage = () => {
   const history = useHistory();
   const signalService = useContext(SignalContext);
   const group = useSelector(getPeerGroup);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
   const [userName, setUserName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
   const [callSetting, setCallSetting] = useState<CallOpt>(CallOpt.New);
 
-  // const onSubmit = () => {
-  //   dispatch(updateUserName(userName));
-  //   history.push(Routes.CallPage);
-  // };
-
+  // Automatically navigate after group has been created and responded by API
   useEffect(() => {
-    console.log("group?.groupCode", group?.groupCode);
+    if (group && shouldNavigate) {
+      history.push(`${Routes.CallPage}/${group.groupCode}`);
+      setShouldNavigate(false);
+    }
   }, [group?.groupCode]);
 
   const onSubmitNewGroup = () => {
     if (groupName) {
       signalService.SendNewGroup(groupName);
       dispatch(updateUserName(userName));
+      setShouldNavigate(true);
+    }
+  };
+
+  const onSubmitExistingGroup = () => {
+    if (groupCode) {
+      dispatch(updateUserName(userName));
+      history.push(`${Routes.CallPage}/${groupCode}`);
     }
   };
 
@@ -86,7 +94,7 @@ export const LandingPage = () => {
             type="submit"
             primary
             label="Join call"
-            // onClick={() => onSubmitNewGroup()}
+            onClick={onSubmitExistingGroup}
           />
         </>
       )}

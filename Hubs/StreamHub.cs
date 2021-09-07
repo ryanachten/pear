@@ -10,6 +10,7 @@ namespace Echo.Hubs
     public class StreamHub : Hub<IStreamHub>
     {
         public static HashSet<string> ConnectedIds = new HashSet<string>();
+        public static List<PeerGroup> PeerGroups = new List<PeerGroup>();
 
         public override Task OnConnectedAsync()
         {
@@ -30,19 +31,36 @@ namespace Echo.Hubs
 
         public async Task SendNewGroup(PeerGroupRequest request)
         {
-            Console.WriteLine($"\n New group received: ${request.Sender} \n");
+            Console.WriteLine($"\n New group received: ${request.Data.GroupName} \n");
 
             var groupCode = new GroupCode().Value;
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupCode);
+            var peerGroup = new PeerGroup(request.Data.GroupName, groupCode);
+            PeerGroups.Add(peerGroup);
 
             await Clients.Caller.ReceivePeerGroup(new PeerGroupRequest()
             {
                 Sender = request.Sender,
-                Data = new PeerGroup()
-                {
-                    GroupName = request.Data.GroupName,
-                    GroupCode = groupCode
-                }
+                Data = peerGroup
+            });
+        }
+
+        public async Task SendAddToGroup(PeerGroupRequest request)
+        {
+            Console.WriteLine($"\n Adding group: user ${request.Sender} to group ${request.Data.GroupName} \n");
+
+            var peerGroup = PeerGroups.Find(x => x.GroupCode == request.Data.GroupCode);
+            if (peerGroup == null)
+            {
+                // TODO: add better error handling when accessing an expired call
+                return;
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, request.Data.GroupCode);
+
+            await Clients.Caller.ReceivePeerGroup(new PeerGroupRequest()
+            {
+                Sender = request.Sender,
+                Data = peerGroup
             });
         }
 

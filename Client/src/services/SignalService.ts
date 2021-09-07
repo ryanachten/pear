@@ -33,6 +33,17 @@ export class SignalService {
     }
   }
 
+  public SendAddToGroup(groupCode: string) {
+    if (this.connection) {
+      this.connection.send(SignalEvent.SendAddToGroup, {
+        sender: this.connection.connectionId,
+        data: {
+          groupCode,
+        },
+      } as PeerGroupRequest);
+    }
+  }
+
   public SendConnection() {
     if (this.connection) {
       this.connection.send(SignalEvent.SendConnected, {
