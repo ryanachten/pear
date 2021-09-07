@@ -9,6 +9,8 @@ import { serviceSignalInstance, SignalContext } from "./services/SignalService";
 import { LoadingPage } from "./pages/LoadingPage";
 import { isServiceLoading } from "./selectors/peerSelectors";
 
+import "./App.css";
+
 function App() {
   const loading = useSelector(isServiceLoading);
 

@@ -1,4 +1,7 @@
+import { Text } from "grommet";
 import { Ref } from "react";
+
+import "./VideoPlayer.css";
 
 interface IVideoPlayerProps {
   subtitle: string;
@@ -6,8 +9,8 @@ interface IVideoPlayerProps {
 }
 
 export const VideoPlayer = ({ subtitle, videoRef }: IVideoPlayerProps) => (
-  <div>
-    <p>{subtitle}</p>
-    <video ref={videoRef} className="VideoChat__Element" />
+  <div className="VideoPlayer">
+    <video ref={videoRef} className="VideoPlayer__video" />
+    <Text className="VideoPlayer__text">{subtitle}</Text>
   </div>
 );
