@@ -1,11 +1,17 @@
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
+import styled from "styled-components";
+
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
-
-import "./VideoChat.css";
 import { VideoPlayer } from "./VideoPlayer";
+
+const VideoGrid = styled.div`
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
+`;
 
 const VideoChat = () => {
   const videosEl = useRef<HTMLDivElement>(null);
@@ -49,10 +55,10 @@ const VideoChat = () => {
   };
 
   return (
-    <div className="VideoChat__Grid" ref={videosEl}>
+    <VideoGrid ref={videosEl}>
       <VideoPlayer subtitle={userName} videoRef={selfVideoEl} />
       {PeerVideos}
-    </div>
+    </VideoGrid>
   );
 };
 
