@@ -6,9 +6,11 @@ namespace Echo.Hubs.Clients
     public interface IStreamHub
     {
         Task ReceiveMessage(ChatMessage message);
-        Task ReceiveNewPeer(SignalRequest peer);
+        Task ReceivePeerGroup(PeerGroupRequest group);
+        Task ReceivePeerGroupNotFound(PeerGroupRequest group);
+        Task ReceiveNewPeer(PeerConnectionRequest peer);
         Task ReceiveNewInitiator(SignalRequest peer);
         Task ReceiveSignal(SignalRequest stream);
-        Task ReceivePeerDisconnected(SignalRequest peer);
+        Task ReceivePeerDisconnected(DisconnectionResponse peer);
     }
 }
