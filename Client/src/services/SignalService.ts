@@ -85,7 +85,7 @@ export class SignalService {
   private async getStream() {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      // audio: true,
+      audio: true,
     });
     this.stream = stream;
   }

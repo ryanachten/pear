@@ -56,7 +56,12 @@ const VideoChat = () => {
 
   return (
     <VideoGrid ref={videosEl}>
-      <VideoPlayer subtitle={userName} videoRef={selfVideoEl} />
+      <VideoPlayer
+        muteByDefault
+        showControls
+        subtitle={userName}
+        videoRef={selfVideoEl}
+      />
       {PeerVideos}
     </VideoGrid>
   );
