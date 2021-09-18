@@ -21,7 +21,7 @@ const VideoChat = () => {
   const userName = useSelector(getUserName);
 
   useEffect(() => {
-    signalService.SendConnection();
+    signalService.sendConnection();
   }, [signalService]);
 
   useEffect(() => {

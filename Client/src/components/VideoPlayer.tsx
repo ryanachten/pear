@@ -41,18 +41,11 @@ export const VideoPlayer = ({
   const [mutedVideo, setMuteVideo] = useState(false);
 
   const muteAudio = (muted: boolean) => {
-    var tracks = signalService.stream?.getAudioTracks();
-    tracks?.forEach((track) => {
-      track.enabled = !muted;
-    });
-
+    signalService.enableAudioStream(!muted);
     setMuteAudio(muted);
   };
   const muteVideo = (muted: boolean) => {
-    var tracks = signalService.stream?.getVideoTracks();
-    tracks?.forEach((track) => {
-      track.enabled = !muted;
-    });
+    signalService.enableVideoStream(!muted);
     setMuteVideo(muted);
   };
 
