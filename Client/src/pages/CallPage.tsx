@@ -22,7 +22,7 @@ export const CallPage = () => {
   const navigateHome = () => history.push(Routes.Home);
 
   useEffect(() => {
-    signalService.SendAddToGroup(groupCode);
+    signalService.sendAddToGroup(groupCode);
   }, []);
 
   if (!group && !groupError) {

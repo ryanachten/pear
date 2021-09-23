@@ -14,14 +14,13 @@ const VideoGrid = styled.div`
 `;
 
 const VideoChat = () => {
-  const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
   const peers = useSelector(getPeers);
   const userName = useSelector(getUserName);
 
   useEffect(() => {
-    signalService.SendConnection();
+    signalService.sendConnection();
   }, [signalService]);
 
   useEffect(() => {
@@ -55,8 +54,13 @@ const VideoChat = () => {
   };
 
   return (
-    <VideoGrid ref={videosEl}>
-      <VideoPlayer subtitle={userName} videoRef={selfVideoEl} />
+    <VideoGrid>
+      <VideoPlayer
+        muteByDefault
+        showControls
+        subtitle={`${userName} (you)`}
+        videoRef={selfVideoEl}
+      />
       {PeerVideos}
     </VideoGrid>
   );

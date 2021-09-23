@@ -29,7 +29,7 @@ export class SignalService {
     this.init();
   }
 
-  public SendNewGroup(groupName: string) {
+  public sendNewGroup(groupName: string) {
     if (this.connection) {
       this.connection.send(SignalEvent.SendNewGroup, {
         sender: this.connection.connectionId,
@@ -40,7 +40,7 @@ export class SignalService {
     }
   }
 
-  public SendAddToGroup(groupCode: string) {
+  public sendAddToGroup(groupCode: string) {
     if (this.connection) {
       this.connection.send(SignalEvent.SendAddToGroup, {
         sender: this.connection.connectionId,
@@ -51,7 +51,7 @@ export class SignalService {
     }
   }
 
-  public SendConnection() {
+  public sendConnection() {
     if (this.connection) {
       this.connection.send(SignalEvent.SendConnected, {
         sender: this.connection.connectionId,
@@ -61,6 +61,20 @@ export class SignalService {
         },
       } as ConnectedRequest);
     }
+  }
+
+  public enableAudioStream(value: boolean) {
+    var tracks = this.stream?.getAudioTracks();
+    tracks?.forEach((track) => {
+      track.enabled = value;
+    });
+  }
+
+  public enableVideoStream(value: boolean) {
+    var tracks = this.stream?.getVideoTracks();
+    tracks?.forEach((track) => {
+      track.enabled = value;
+    });
   }
 
   private async init() {
@@ -85,7 +99,7 @@ export class SignalService {
   private async getStream() {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      // audio: true,
+      audio: true,
     });
     this.stream = stream;
   }

@@ -42,7 +42,7 @@ export const LandingPage = () => {
 
   const onSubmitNewGroup = () => {
     if (groupName) {
-      signalService.SendNewGroup(groupName);
+      signalService.sendNewGroup(groupName);
       dispatch(updateUserName(userName));
       setShouldNavigate(true);
     }
