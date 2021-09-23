@@ -1,4 +1,4 @@
-import { Button, Text } from "grommet";
+import { Box, Button, Text, Video } from "grommet";
 import {
   Microphone as MicrophoneIcon,
   Video as VideoIcon,
@@ -14,13 +14,9 @@ interface IVideoPlayerProps {
   showControls?: boolean;
 }
 
-const Video = styled.video`
-  width: 100%;
-  max-height: 100%;
-`;
-
-const VideoWrapper = styled.div`
+const VideoWrapper = styled(Box)`
   position: relative;
+  max-height: calc(100vh - 60px);
 `;
 
 const MetaWrapper = styled.div`
@@ -37,7 +33,7 @@ export const VideoPlayer = ({
   showControls,
 }: IVideoPlayerProps) => {
   const signalService = useContext(SignalContext);
-  const [mutedAudio, setMuteAudio] = useState(false);
+  const [mutedAudio, setMuteAudio] = useState(true);
   const [mutedVideo, setMuteVideo] = useState(false);
 
   const muteAudio = (muted: boolean) => {
@@ -50,9 +46,8 @@ export const VideoPlayer = ({
   };
 
   return (
-    <VideoWrapper>
+    <VideoWrapper background="light-4">
       <MetaWrapper>
-        <Text>{subtitle}</Text>
         {showControls && (
           <>
             <Button
@@ -64,13 +59,20 @@ export const VideoPlayer = ({
             />
             <Button
               active
+              margin={{ horizontal: "small" }}
               icon={<VideoIcon color={mutedVideo ? "status-error" : "brand"} />}
               onClick={() => muteVideo(!mutedVideo)}
             />
           </>
         )}
+        <Text>{subtitle}</Text>
       </MetaWrapper>
-      <Video ref={videoRef} muted={muteByDefault} />
+      <Video
+        fit="cover"
+        ref={videoRef}
+        muted={muteByDefault}
+        controls={false}
+      />
     </VideoWrapper>
   );
 };

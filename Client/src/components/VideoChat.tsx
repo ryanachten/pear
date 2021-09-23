@@ -14,7 +14,6 @@ const VideoGrid = styled.div`
 `;
 
 const VideoChat = () => {
-  const videosEl = useRef<HTMLDivElement>(null);
   const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
   const peers = useSelector(getPeers);
@@ -55,11 +54,11 @@ const VideoChat = () => {
   };
 
   return (
-    <VideoGrid ref={videosEl}>
+    <VideoGrid>
       <VideoPlayer
         muteByDefault
         showControls
-        subtitle={userName}
+        subtitle={`${userName} (you)`}
         videoRef={selfVideoEl}
       />
       {PeerVideos}
