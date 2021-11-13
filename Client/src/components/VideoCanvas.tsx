@@ -1,80 +1,120 @@
-import { Camera } from "@mediapipe/camera_utils";
-import { Results, SelfieSegmentation } from "@mediapipe/selfie_segmentation";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
+import "@tensorflow/tfjs-backend-webgl";
+import {
+  BodyPix,
+  drawBokehEffect,
+  drawMask,
+  load,
+  SemanticPersonSegmentation,
+  toMask,
+} from "@tensorflow-models/body-pix";
+
+export enum BackgroundMode {
+  Blur,
+  Mask,
+}
 
 export interface IVideoCanvasProps {
   videoRef: RefObject<HTMLVideoElement>;
 }
 
 const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
-  const [selfieSegmentation] = useState(
-    new SelfieSegmentation({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1/${file}`;
-      },
-    })
-  );
-  const canvasEl = useRef<HTMLCanvasElement>(null);
-  const [canvasContext, setCanvasContext] =
-    useState<CanvasRenderingContext2D>();
+  const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [flipHorizontal] = useState(true);
+  const [backgroundMode] = useState<BackgroundMode>(BackgroundMode.Blur);
 
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    const camera = new Camera(videoElement, {
-      onFrame: async () => {
-        await selfieSegmentation.send({ image: videoElement });
-      },
-    });
-    camera.start();
-  }, [videoRef, selfieSegmentation]);
-
-  const drawCanvasFrame = useCallback(
-    (results: Results) => {
-      if (!canvasContext || !canvasEl.current) return;
-      const canvas = canvasEl.current;
-
-      canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-      canvasContext.drawImage(
-        results.segmentationMask,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      canvasContext.globalCompositeOperation = "source-out";
-      canvasContext.fillStyle = "#00FF00";
-      canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-
-      canvasContext.filter = "blur(8px)";
-
-      // Only overwrite missing pixels.
-      // canvasContext.globalCompositeOperation = "destination-atop";
-      canvasContext.globalCompositeOperation = "darken";
-      // canvasContext.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
-      canvasContext.restore();
-    },
-    [canvasContext]
-  );
+    videoElement.onloadedmetadata = () => {
+      // Not sure why, but the bokeh effect seems to set the video element height and width to 0
+      // causing a canvas error - hence we cache these values to video dimensions on component mount
+      videoElement.height = videoElement.videoHeight;
+      videoElement.width = videoElement.videoWidth;
+      loadAndPredict();
+    };
+  }, []);
 
   useEffect(() => {
-    const context = canvasEl.current?.getContext("2d");
-    if (context) {
-      setCanvasContext(context);
+    animate();
+  }, [canvasRef.current, videoRef.current, bodyPixNet]);
+
+  async function loadAndPredict() {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const net = await load({
+      architecture: "MobileNetV1",
+      outputStride: 16,
+      multiplier: 0.75,
+      quantBytes: 2,
+    });
+
+    setBodyPixNet(net);
+  }
+
+  async function animate() {
+    const canvas = canvasRef.current;
+    const videoElement = videoRef.current;
+    if (!canvas || !videoElement || !bodyPixNet) return;
+
+    const segmentation = await bodyPixNet.segmentPerson(videoElement);
+
+    switch (backgroundMode) {
+      case BackgroundMode.Mask:
+        mask(segmentation);
+        break;
+
+      case BackgroundMode.Blur:
+      default:
+        blur(segmentation);
+        break;
     }
-  }, [canvasEl]);
 
-  useEffect(() => {
-    selfieSegmentation.setOptions({
-      modelSelection: 1,
-    });
-    selfieSegmentation.onResults(drawCanvasFrame);
-  });
+    requestAnimationFrame(animate);
+  }
 
-  return <canvas ref={canvasEl} />;
+  function blur(segmentation: SemanticPersonSegmentation) {
+    const canvas = canvasRef.current;
+    const videoElement = videoRef.current;
+    if (!canvas || !videoElement || !bodyPixNet) return;
+
+    const backgroundBlurAmount = 3;
+    const edgeBlurAmount = 3;
+
+    drawBokehEffect(
+      canvas,
+      videoElement,
+      segmentation,
+      backgroundBlurAmount,
+      edgeBlurAmount,
+      flipHorizontal
+    );
+  }
+
+  function mask(segmentation: SemanticPersonSegmentation) {
+    const canvas = canvasRef.current;
+    const videoElement = videoRef.current;
+    if (!canvas || !videoElement || !bodyPixNet) return;
+
+    const coloredPartImage = toMask(segmentation);
+
+    const opacity = 0.7;
+    const maskBlurAmount = 3;
+
+    drawMask(
+      canvas,
+      videoElement,
+      coloredPartImage,
+      opacity,
+      maskBlurAmount,
+      flipHorizontal
+    );
+  }
+
+  return <canvas ref={canvasRef} />;
 };
 
 export default VideoCanvas;

@@ -45,7 +45,7 @@ const VideoChat = () => {
   const setupSelfVideo = (stream: MediaStream) => {
     if (selfVideoEl.current) {
       selfVideoEl.current.srcObject = stream;
-      // selfVideoEl.current.play();
+      selfVideoEl.current.play();
     }
   };
 
