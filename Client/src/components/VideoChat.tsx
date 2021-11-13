@@ -6,6 +6,7 @@ import { SignalContext } from "../services/SignalService";
 
 import "./VideoChat.css";
 import { VideoPlayer } from "./VideoPlayer";
+import VideoCanvas from "./VideoCanvas";
 
 const VideoChat = () => {
   const videosEl = useRef<HTMLDivElement>(null);
@@ -44,13 +45,16 @@ const VideoChat = () => {
   const setupSelfVideo = (stream: MediaStream) => {
     if (selfVideoEl.current) {
       selfVideoEl.current.srcObject = stream;
-      selfVideoEl.current.play();
+      // selfVideoEl.current.play();
     }
   };
 
   return (
     <div className="VideoChat__Grid" ref={videosEl}>
-      <VideoPlayer subtitle={username} videoRef={selfVideoEl} />
+      <div className="VideoChat__Element">
+        <VideoCanvas videoRef={selfVideoEl} />
+        <VideoPlayer subtitle={username} videoRef={selfVideoEl} />
+      </div>
       {PeerVideos}
     </div>
   );

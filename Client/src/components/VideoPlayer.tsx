@@ -8,6 +8,6 @@ interface IVideoPlayerProps {
 export const VideoPlayer = ({ subtitle, videoRef }: IVideoPlayerProps) => (
   <div>
     <p>{subtitle}</p>
-    <video ref={videoRef} className="VideoChat__Element" />
+    <video ref={videoRef} />
   </div>
 );
