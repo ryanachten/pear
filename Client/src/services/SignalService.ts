@@ -1,19 +1,27 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { createContext } from "react";
 import {
+  PeerGroupRequest,
   NewUserRequest,
   SignalEvent,
   SignalRequest,
   SignalResponse,
+  ConnectedRequest,
 } from "../constants/interfaces";
 import { Routes } from "../constants/routes";
 import { SignalPeer } from "../models/SignalPeer";
-import { removePeer, serviceIsReady } from "../reducers/peerSlice";
+import {
+  addGroup,
+  removePeer,
+  serviceIsReady,
+  setGroupError,
+} from "../reducers/peerSlice";
 import { store } from "../reducers/store";
 
 export class SignalService {
   public stream: MediaStream | undefined;
   public connection: HubConnection | undefined;
+  public groupCode: string | undefined;
   public peers: Array<SignalPeer> = [];
   private loggingEnabled: boolean = false;
 
@@ -21,15 +29,52 @@ export class SignalService {
     this.init();
   }
 
-  public SendConnection() {
+  public sendNewGroup(groupName: string) {
+    if (this.connection) {
+      this.connection.send(SignalEvent.SendNewGroup, {
+        sender: this.connection.connectionId,
+        data: {
+          groupName,
+        },
+      } as PeerGroupRequest);
+    }
+  }
+
+  public sendAddToGroup(groupCode: string) {
+    if (this.connection) {
+      this.connection.send(SignalEvent.SendAddToGroup, {
+        sender: this.connection.connectionId,
+        data: {
+          groupCode,
+        },
+      } as PeerGroupRequest);
+    }
+  }
+
+  public sendConnection() {
     if (this.connection) {
       this.connection.send(SignalEvent.SendConnected, {
         sender: this.connection.connectionId,
+        groupCode: this.groupCode,
         data: {
-          username: store.getState().user.username,
+          userName: store.getState().user.userName,
         },
-      } as NewUserRequest);
+      } as ConnectedRequest);
     }
+  }
+
+  public enableAudioStream(value: boolean) {
+    var tracks = this.stream?.getAudioTracks();
+    tracks?.forEach((track) => {
+      track.enabled = value;
+    });
+  }
+
+  public enableVideoStream(value: boolean) {
+    var tracks = this.stream?.getVideoTracks();
+    tracks?.forEach((track) => {
+      track.enabled = value;
+    });
   }
 
   private async init() {
@@ -54,7 +99,7 @@ export class SignalService {
   private async getStream() {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      // audio: true,
+      audio: true,
     });
     this.stream = stream;
   }
@@ -65,6 +110,23 @@ export class SignalService {
       // Set peer ID to signalR connection ID
       const peerId = this.connection.connectionId;
       this.log("peerId", peerId);
+
+      connection.on(
+        SignalEvent.ReceivePeerGroup,
+        (response: PeerGroupRequest) => {
+          this.groupCode = response.data.groupCode;
+          store.dispatch(addGroup(response.data));
+        }
+      );
+
+      connection.on(
+        SignalEvent.ReceivePeerGroupNotFound,
+        (response: PeerGroupRequest) => {
+          store.dispatch(
+            setGroupError(`Call with code ${response.data.groupCode} not found`)
+          );
+        }
+      );
 
       connection.on(SignalEvent.ReceiveNewPeer, (peer: NewUserRequest) => {
         const newPeer = new SignalPeer({
@@ -80,7 +142,7 @@ export class SignalService {
           sender: peerId,
           receiver: peer.sender,
           data: {
-            username: store.getState().user.username,
+            userName: store.getState().user.userName,
           },
         } as NewUserRequest);
       });
