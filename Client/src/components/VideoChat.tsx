@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
+import VideoCanvas from "./VideoCanvas";
 import { VideoPlayer } from "./VideoPlayer";
 
 const VideoGrid = styled.div`
@@ -55,9 +56,9 @@ const VideoChat = () => {
 
   return (
     <VideoGrid>
+      <VideoCanvas videoRef={selfVideoEl} />
       <VideoPlayer
         muteByDefault
-        showControls
         subtitle={`${userName} (you)`}
         videoRef={selfVideoEl}
       />

@@ -1,4 +1,5 @@
 import { RefObject, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import "@tensorflow/tfjs-backend-webgl";
 import {
   BodyPix,
@@ -8,11 +9,8 @@ import {
   SemanticPersonSegmentation,
   toMask,
 } from "@tensorflow-models/body-pix";
-
-export enum BackgroundMode {
-  Blur,
-  Mask,
-}
+import { VideoBackgroundMode } from "../constants/interfaces";
+import { getBackgroundMode } from "../selectors/callSelector";
 
 export interface IVideoCanvasProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -22,7 +20,9 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flipHorizontal] = useState(true);
-  const [backgroundMode] = useState<BackgroundMode>(BackgroundMode.Blur);
+  const backgroundMode = useSelector(getBackgroundMode);
+  const [animationFrame, setAnimationFrame] = useState<number>();
+  const [animationStarted, setAnimationStarted] = useState(false);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -38,8 +38,23 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   }, []);
 
   useEffect(() => {
-    animate();
-  }, [canvasRef.current, videoRef.current, bodyPixNet]);
+    // Cancel current animation
+    if (animationStarted && animationFrame !== undefined) {
+      cancelAnimationFrame(animationFrame);
+      setAnimationFrame(undefined);
+      setAnimationStarted(false);
+    }
+    if (backgroundMode !== VideoBackgroundMode.None && !animationStarted) {
+      animate();
+      setAnimationStarted(true);
+    }
+  }, [
+    canvasRef.current,
+    videoRef.current,
+    bodyPixNet,
+    backgroundMode,
+    animationStarted,
+  ]);
 
   async function loadAndPredict() {
     const videoElement = videoRef.current;
@@ -62,18 +77,23 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
 
     const segmentation = await bodyPixNet.segmentPerson(videoElement);
 
+    console.log("backgroundMode", backgroundMode);
+
     switch (backgroundMode) {
-      case BackgroundMode.Mask:
+      case VideoBackgroundMode.Mask:
         mask(segmentation);
         break;
 
-      case BackgroundMode.Blur:
-      default:
+      case VideoBackgroundMode.Blur:
         blur(segmentation);
         break;
+
+      default:
+      // Do nothing - shouldn't render canvas if no background effect selected
     }
 
-    requestAnimationFrame(animate);
+    const raf = requestAnimationFrame(animate);
+    setAnimationFrame(raf);
   }
 
   function blur(segmentation: SemanticPersonSegmentation) {
