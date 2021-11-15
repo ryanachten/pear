@@ -21,23 +21,24 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flipHorizontal] = useState(true);
   const backgroundMode = useSelector(getBackgroundMode);
+  const backgroundModeRef = useRef<VideoBackgroundMode>(backgroundMode);
   const animationFrame = useRef<number>();
-
-  console.log("backgroundMode", backgroundMode);
 
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
+    // Trigger loading of model once video metadata has loaded
     videoElement.onloadedmetadata = () => {
       // Not sure why, but the bokeh effect seems to set the video element height and width to 0
       // causing a canvas error - hence we cache these values to video dimensions on component mount
       videoElement.height = videoElement.videoHeight;
       videoElement.width = videoElement.videoWidth;
-      loadAndPredict();
+      loadModel();
     };
   }, []);
 
+  // Trigger animation once body pix model has loaded
   useEffect(() => {
     animationFrame.current = requestAnimationFrame(animate);
     return () => {
@@ -47,10 +48,12 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
     };
   }, [bodyPixNet]);
 
-  async function loadAndPredict() {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
+  // Apply background mode to ref to prevent stale state issues
+  useEffect(() => {
+    backgroundModeRef.current = backgroundMode;
+  }, [backgroundMode]);
 
+  async function loadModel() {
     const net = await load({
       architecture: "MobileNetV1",
       outputStride: 16,
@@ -68,11 +71,9 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
     // Does not receive updates from Redux store
     if (!canvas || !videoElement || !bodyPixNet) return;
 
-    console.log("animate backgroundMode", backgroundMode);
-
     const segmentation = await bodyPixNet.segmentPerson(videoElement);
 
-    switch (backgroundMode) {
+    switch (backgroundModeRef.current) {
       case VideoBackgroundMode.Mask:
         mask(segmentation);
         break;
