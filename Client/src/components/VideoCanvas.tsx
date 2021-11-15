@@ -39,8 +39,13 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   }, []);
 
   useEffect(() => {
-    animate();
-  }, []);
+    animationFrame.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
+    };
+  }, [bodyPixNet]);
 
   async function loadAndPredict() {
     const videoElement = videoRef.current;
@@ -61,9 +66,9 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
     const videoElement = videoRef.current;
 
     // Does not receive updates from Redux store
-    console.log("animate backgroundMode", backgroundMode);
-
     if (!canvas || !videoElement || !bodyPixNet) return;
+
+    console.log("animate backgroundMode", backgroundMode);
 
     const segmentation = await bodyPixNet.segmentPerson(videoElement);
 
