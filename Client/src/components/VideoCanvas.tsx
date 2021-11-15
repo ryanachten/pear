@@ -21,8 +21,9 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flipHorizontal] = useState(true);
   const backgroundMode = useSelector(getBackgroundMode);
-  const [animationFrame, setAnimationFrame] = useState<number>();
-  const [animationStarted, setAnimationStarted] = useState(false);
+  const animationFrame = useRef<number>();
+
+  console.log("backgroundMode", backgroundMode);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -38,23 +39,8 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   }, []);
 
   useEffect(() => {
-    // Cancel current animation
-    if (animationStarted && animationFrame !== undefined) {
-      cancelAnimationFrame(animationFrame);
-      setAnimationFrame(undefined);
-      setAnimationStarted(false);
-    }
-    if (backgroundMode !== VideoBackgroundMode.None && !animationStarted) {
-      animate();
-      setAnimationStarted(true);
-    }
-  }, [
-    canvasRef.current,
-    videoRef.current,
-    bodyPixNet,
-    backgroundMode,
-    animationStarted,
-  ]);
+    animate();
+  }, []);
 
   async function loadAndPredict() {
     const videoElement = videoRef.current;
@@ -73,11 +59,13 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   async function animate() {
     const canvas = canvasRef.current;
     const videoElement = videoRef.current;
+
+    // Does not receive updates from Redux store
+    console.log("animate backgroundMode", backgroundMode);
+
     if (!canvas || !videoElement || !bodyPixNet) return;
 
     const segmentation = await bodyPixNet.segmentPerson(videoElement);
-
-    console.log("backgroundMode", backgroundMode);
 
     switch (backgroundMode) {
       case VideoBackgroundMode.Mask:
@@ -92,8 +80,7 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
       // Do nothing - shouldn't render canvas if no background effect selected
     }
 
-    const raf = requestAnimationFrame(animate);
-    setAnimationFrame(raf);
+    animationFrame.current = requestAnimationFrame(animate);
   }
 
   function blur(segmentation: SemanticPersonSegmentation) {
