@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { showVideoCanvas } from "../selectors/callSelector";
 
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
@@ -21,7 +20,6 @@ const VideoChat = () => {
   const signalService = useContext(SignalContext);
   const peers = useSelector(getPeers);
   const userName = useSelector(getUserName);
-  const showCanvas = useSelector(showVideoCanvas);
 
   useEffect(() => {
     signalService.sendConnection();
@@ -61,8 +59,8 @@ const VideoChat = () => {
   return (
     <VideoGrid>
       <VideoWrapper subtitle={userName}>
-        <VideoPlayer hidden={showCanvas} muteByDefault videoRef={selfVideoEl} />
-        <VideoCanvas hidden={!showCanvas} videoRef={selfVideoEl} />
+        <VideoPlayer hidden muteByDefault videoRef={selfVideoEl} />
+        <VideoCanvas videoRef={selfVideoEl} />
       </VideoWrapper>
       {PeerVideos}
     </VideoGrid>
