@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { CSSProperties, RefObject, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import "@tensorflow/tfjs-backend-webgl";
 import {
@@ -13,10 +13,11 @@ import { VideoBackgroundMode } from "../constants/interfaces";
 import { getBackgroundMode } from "../selectors/callSelector";
 
 export interface IVideoCanvasProps {
+  hidden: boolean;
   videoRef: RefObject<HTMLVideoElement>;
 }
 
-const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
+const VideoCanvas = ({ videoRef, hidden }: IVideoCanvasProps) => {
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flipHorizontal] = useState(true);
@@ -126,8 +127,10 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
       flipHorizontal
     );
   }
-
-  return <canvas ref={canvasRef} />;
+  const hiddenStyles: CSSProperties = {
+    display: "none",
+  };
+  return <canvas style={hidden ? hiddenStyles : {}} ref={canvasRef} />;
 };
 
 export default VideoCanvas;

@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useMemo, useRef } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { showVideoCanvas } from "../selectors/callSelector";
 
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
 import VideoCanvas from "./VideoCanvas";
 import { VideoPlayer } from "./VideoPlayer";
+import VideoWrapper from "./VideoWrapper";
 
 const VideoGrid = styled.div`
   display: grid;
@@ -19,6 +21,7 @@ const VideoChat = () => {
   const signalService = useContext(SignalContext);
   const peers = useSelector(getPeers);
   const userName = useSelector(getUserName);
+  const showCanvas = useSelector(showVideoCanvas);
 
   useEffect(() => {
     signalService.sendConnection();
@@ -31,17 +34,18 @@ const VideoChat = () => {
   const PeerVideos = useMemo(() => {
     const videos = signalService.peers.map((x) => {
       return (
-        <VideoPlayer
-          key={x.id}
-          subtitle={x.userMetadata.userName || x.id}
-          videoRef={(ref) => {
-            // Only configure stream if src hasn't alread been set
-            if (ref && !ref.srcObject && x.stream) {
-              ref.srcObject = x.stream;
-              ref.play();
-            }
-          }}
-        />
+        <VideoWrapper key={x.id} subtitle={x.userMetadata.userName || x.id}>
+          <VideoPlayer
+            key={x.id}
+            videoRef={(ref) => {
+              // Only configure stream if src hasn't alread been set
+              if (ref && !ref.srcObject && x.stream) {
+                ref.srcObject = x.stream;
+                ref.play();
+              }
+            }}
+          />
+        </VideoWrapper>
       );
     });
     return videos;
@@ -56,12 +60,10 @@ const VideoChat = () => {
 
   return (
     <VideoGrid>
-      <VideoCanvas videoRef={selfVideoEl} />
-      <VideoPlayer
-        muteByDefault
-        subtitle={`${userName} (you)`}
-        videoRef={selfVideoEl}
-      />
+      <VideoWrapper subtitle={userName}>
+        <VideoPlayer hidden={showCanvas} muteByDefault videoRef={selfVideoEl} />
+        <VideoCanvas hidden={!showCanvas} videoRef={selfVideoEl} />
+      </VideoWrapper>
       {PeerVideos}
     </VideoGrid>
   );

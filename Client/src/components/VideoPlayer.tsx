@@ -1,41 +1,32 @@
-import { Box, Text, Video } from "grommet";
-import React, { Ref } from "react";
+import { Video } from "grommet";
+import React, { CSSProperties, Ref } from "react";
 import styled from "styled-components";
 
 interface IVideoPlayerProps {
-  subtitle: string;
   videoRef: Ref<HTMLVideoElement>;
   muteByDefault?: boolean;
+  hidden?: boolean;
 }
 
-const VideoWrapper = styled(Box)`
-  position: relative;
-  max-height: calc(100vh - 60px);
-`;
-
-const MetaWrapper = styled.div`
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  z-index: 2;
+const FlippedVideo = styled(Video)`
+  transform: scaleX(-1);
 `;
 
 export const VideoPlayer = ({
   muteByDefault,
-  subtitle,
   videoRef,
+  hidden,
 }: IVideoPlayerProps) => {
+  const hiddenStyles: CSSProperties = {
+    display: "none",
+  };
   return (
-    <VideoWrapper background="light-4">
-      <MetaWrapper>
-        <Text>{subtitle}</Text>
-      </MetaWrapper>
-      <Video
-        fit="cover"
-        ref={videoRef}
-        muted={muteByDefault}
-        controls={false}
-      />
-    </VideoWrapper>
+    <FlippedVideo
+      style={hidden ? hiddenStyles : {}}
+      fit="cover"
+      ref={videoRef}
+      muted={muteByDefault}
+      controls={false}
+    />
   );
 };
