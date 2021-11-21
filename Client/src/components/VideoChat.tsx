@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useMemo } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -16,18 +16,9 @@ const VideoGrid = styled.div`
 `;
 
 const VideoChat = () => {
-  const selfVideoEl = useRef<HTMLVideoElement>(null);
   const signalService = useContext(SignalContext);
   const peers = useSelector(getPeers);
   const userName = useSelector(getUserName);
-
-  useEffect(() => {
-    signalService.sendConnection();
-  }, [signalService]);
-
-  useEffect(() => {
-    signalService.stream && setupSelfVideo(signalService.stream);
-  }, [signalService.stream]);
 
   const PeerVideos = useMemo(() => {
     const videos = signalService.peers.map((x) => {
@@ -49,18 +40,10 @@ const VideoChat = () => {
     return videos;
   }, [peers]);
 
-  const setupSelfVideo = (stream: MediaStream) => {
-    if (selfVideoEl.current) {
-      selfVideoEl.current.srcObject = stream;
-      selfVideoEl.current.play();
-    }
-  };
-
   return (
     <VideoGrid>
       <VideoWrapper subtitle={userName}>
-        <VideoPlayer hidden muteByDefault videoRef={selfVideoEl} />
-        <VideoCanvas videoRef={selfVideoEl} />
+        <VideoCanvas />
       </VideoWrapper>
       {PeerVideos}
     </VideoGrid>

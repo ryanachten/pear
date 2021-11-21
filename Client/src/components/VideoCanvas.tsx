@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import "@tensorflow/tfjs-backend-webgl";
 import {
@@ -12,40 +12,23 @@ import {
 import { VideoBackgroundMode } from "../constants/interfaces";
 import { getBackgroundMode } from "../selectors/callSelector";
 import styled from "styled-components";
-
-export interface IVideoCanvasProps {
-  videoRef: RefObject<HTMLVideoElement>;
-}
+import { SignalContext } from "../services/SignalService";
 
 const FlippedCanvas = styled.canvas`
   transform: scaleX(-1);
 `;
 
-const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
+const VideoCanvas = () => {
+  const signalContext = useContext(SignalContext);
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>();
   const backgroundMode = useSelector(getBackgroundMode);
   const backgroundModeRef = useRef<VideoBackgroundMode>(backgroundMode);
   const animationFrame = useRef<number>();
 
   useEffect(() => {
-    const videoElement = videoRef.current;
-    const canvasElement = canvasRef.current;
-    if (!videoElement) return;
-
-    // Trigger loading of model once video metadata has loaded
-    videoElement.onloadedmetadata = () => {
-      // Not sure why, but the bokeh effect seems to set the video element height and width to 0
-      // causing a canvas error - hence we cache these values to video dimensions on component mount
-      videoElement.height = videoElement.videoHeight;
-      videoElement.width = videoElement.videoWidth;
-
-      if (canvasElement) {
-        canvasElement.height = videoElement.videoHeight;
-        canvasElement.width = videoElement.videoWidth;
-      }
-      loadModel();
-    };
+    init();
   }, []);
 
   // Trigger animation once body pix model has loaded
@@ -62,6 +45,47 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
   useEffect(() => {
     backgroundModeRef.current = backgroundMode;
   }, [backgroundMode]);
+
+  async function init() {
+    await requestUserMedia();
+
+    const videoElement = videoRef.current;
+    const canvasElement = canvasRef.current;
+    if (!videoElement || !canvasElement) return;
+
+    // Set canvas as stream source and initate peer connection
+    const maxFrameRate = 25;
+    const stream = canvasElement.captureStream(maxFrameRate);
+    signalContext.stream = stream;
+    signalContext.sendConnection();
+
+    // Trigger loading of model once video metadata has loaded
+    videoElement.onloadedmetadata = () => {
+      // Not sure why, but the bokeh effect seems to set the video element height and width to 0
+      // causing a canvas error - hence we cache these values to video dimensions on component mount
+      videoElement.height = videoElement.videoHeight;
+      videoElement.width = videoElement.videoWidth;
+
+      // Set canvas dimensions to be the same as video (prevents having to scale as part of render method)
+      if (canvasElement) {
+        canvasElement.height = videoElement.videoHeight;
+        canvasElement.width = videoElement.videoWidth;
+      }
+      loadModel();
+    };
+  }
+
+  async function requestUserMedia() {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.play();
+
+    videoRef.current = video;
+  }
 
   async function loadModel() {
     const net = await load({
@@ -112,13 +136,7 @@ const VideoCanvas = ({ videoRef }: IVideoCanvasProps) => {
     const ctx = canvas?.getContext("2d");
 
     if (canvas && ctx && videoElement) {
-      // Scale video to retain aspect ratio
-      const maxHeight = Math.max(canvas.height, videoElement.videoHeight);
-      const minHeight = Math.min(canvas.height, videoElement.videoHeight);
-      const maxWidth = Math.max(canvas.width, videoElement.videoWidth);
-      const scaledWidth = (minHeight / maxHeight) * maxWidth;
-
-      ctx.drawImage(videoElement, 0, 0, scaledWidth, canvas.height);
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     }
   }
 

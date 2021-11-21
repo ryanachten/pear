@@ -79,7 +79,6 @@ export class SignalService {
 
   private async init() {
     await this.initSignalConnection();
-    await this.getStream();
     this.registerEventListeners();
 
     store.dispatch(serviceIsReady());
@@ -94,14 +93,6 @@ export class SignalService {
     await connection.start();
 
     this.connection = connection;
-  }
-
-  private async getStream() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    this.stream = stream;
   }
 
   private registerEventListeners() {
