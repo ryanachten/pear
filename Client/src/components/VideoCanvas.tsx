@@ -10,9 +10,16 @@ import {
   toMask,
 } from "@tensorflow-models/body-pix";
 import { VideoBackgroundMode } from "../constants/interfaces";
-import { getBackgroundMode } from "../selectors/callSelector";
+import {
+  getBackgroundBlurAmount,
+  getBackgroundMode,
+  getEdgeBlurAmount,
+  getMaskOpacity,
+  getMaskBlurAmount,
+} from "../selectors/callSelector";
 import styled from "styled-components";
 import { SignalContext } from "../services/SignalService";
+import { CallState, initialCallState } from "../reducers/callSlice";
 
 const FlippedCanvas = styled.canvas`
   transform: scaleX(-1);
@@ -24,8 +31,12 @@ const VideoCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>();
   const backgroundMode = useSelector(getBackgroundMode);
-  const backgroundModeRef = useRef<VideoBackgroundMode>(backgroundMode);
+  const callStateRef = useRef<CallState>(initialCallState);
   const animationFrame = useRef<number>();
+  const backgroundBlurAmount = useSelector(getBackgroundBlurAmount);
+  const edgeBlurAmount = useSelector(getEdgeBlurAmount);
+  const maskOpacity = useSelector(getMaskOpacity);
+  const maskBlurAmount = useSelector(getMaskBlurAmount);
 
   useEffect(() => {
     init();
@@ -41,10 +52,22 @@ const VideoCanvas = () => {
     };
   }, [bodyPixNet]);
 
-  // Apply background mode to ref to prevent stale state issues
+  // Apply call reducer state to ref to prevent stale state issues
   useEffect(() => {
-    backgroundModeRef.current = backgroundMode;
-  }, [backgroundMode]);
+    callStateRef.current = {
+      backgroundMode,
+      backgroundBlurAmount,
+      edgeBlurAmount,
+      maskOpacity,
+      maskBlurAmount,
+    };
+  }, [
+    backgroundMode,
+    backgroundBlurAmount,
+    edgeBlurAmount,
+    maskOpacity,
+    maskBlurAmount,
+  ]);
 
   async function init() {
     await requestUserMedia();
@@ -105,8 +128,10 @@ const VideoCanvas = () => {
     // Does not receive updates from Redux store
     if (!canvas || !videoElement || !bodyPixNet) return;
 
+    const backgroundMode = callStateRef.current.backgroundMode;
+
     // Return early if no effect selected to avoid awaiting segmentation
-    if (backgroundModeRef.current === VideoBackgroundMode.None) {
+    if (backgroundMode === VideoBackgroundMode.None) {
       drawVideo();
       animationFrame.current = requestAnimationFrame(animate);
       return;
@@ -114,7 +139,7 @@ const VideoCanvas = () => {
 
     const segmentation = await bodyPixNet.segmentPerson(videoElement);
 
-    switch (backgroundModeRef.current) {
+    switch (backgroundMode) {
       case VideoBackgroundMode.Mask:
         maskBackground(segmentation);
         break;
@@ -145,15 +170,12 @@ const VideoCanvas = () => {
     const videoElement = videoRef.current;
     if (!canvas || !videoElement || !bodyPixNet) return;
 
-    const backgroundBlurAmount = 3;
-    const edgeBlurAmount = 3;
-
     drawBokehEffect(
       canvas,
       videoElement,
       segmentation,
-      backgroundBlurAmount,
-      edgeBlurAmount
+      callStateRef.current.backgroundBlurAmount,
+      callStateRef.current.edgeBlurAmount
     );
   }
 
@@ -164,10 +186,13 @@ const VideoCanvas = () => {
 
     const coloredPartImage = toMask(segmentation);
 
-    const opacity = 0.7;
-    const maskBlurAmount = 3;
-
-    drawMask(canvas, videoElement, coloredPartImage, opacity, maskBlurAmount);
+    drawMask(
+      canvas,
+      videoElement,
+      coloredPartImage,
+      callStateRef.current.maskOpacity,
+      callStateRef.current.maskBlurAmount
+    );
   }
   return <FlippedCanvas ref={canvasRef} />;
 };

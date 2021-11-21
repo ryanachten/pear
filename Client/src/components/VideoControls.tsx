@@ -10,6 +10,8 @@ import { VideoBackgroundMode } from "../constants/interfaces";
 import { updateBackgroundMode } from "../reducers/callSlice";
 import { getBackgroundMode } from "../selectors/callSelector";
 import { SignalContext } from "../services/SignalService";
+import BlurControls from "./EffectControls/BlurControls";
+import MaskControls from "./EffectControls/MaskControls";
 
 const VideoControls = () => {
   const dispatch = useDispatch();
@@ -45,6 +47,8 @@ const VideoControls = () => {
         value={backgroundMode}
         onChange={({ option }) => dispatch(updateBackgroundMode(option))}
       />
+      {backgroundMode === VideoBackgroundMode.Blur && <BlurControls />}
+      {backgroundMode === VideoBackgroundMode.Mask && <MaskControls />}
     </div>
   );
 };
