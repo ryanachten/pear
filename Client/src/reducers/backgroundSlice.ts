@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { VideoBackgroundMode } from "../constants/interfaces";
 
-export interface CallState {
+export interface BackgroundState {
   backgroundMode: VideoBackgroundMode;
   backgroundBlurAmount: number;
   edgeBlurAmount: number;
@@ -9,7 +9,7 @@ export interface CallState {
   maskBlurAmount: number;
 }
 
-export const initialCallState: CallState = {
+export const initialBackgroundState: BackgroundState = {
   backgroundMode: VideoBackgroundMode.None,
   backgroundBlurAmount: 10,
   edgeBlurAmount: 7,
@@ -17,9 +17,9 @@ export const initialCallState: CallState = {
   maskBlurAmount: 5,
 };
 
-export const callSlice = createSlice({
-  name: "call",
-  initialState: initialCallState,
+export const backgroundSlice = createSlice({
+  name: "background",
+  initialState: initialBackgroundState,
   reducers: {
     updateBackgroundMode: (
       state,
@@ -48,6 +48,6 @@ export const {
   updateEdgeBlurAmount,
   updateMaskOpacity,
   updateMaskBlurAmount,
-} = callSlice.actions;
+} = backgroundSlice.actions;
 
-export default callSlice.reducer;
+export default backgroundSlice.reducer;

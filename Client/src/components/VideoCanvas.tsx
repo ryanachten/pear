@@ -16,10 +16,13 @@ import {
   getEdgeBlurAmount,
   getMaskOpacity,
   getMaskBlurAmount,
-} from "../selectors/callSelector";
+} from "../selectors/backgroundSelector";
 import styled from "styled-components";
 import { SignalContext } from "../services/SignalService";
-import { CallState, initialCallState } from "../reducers/callSlice";
+import {
+  BackgroundState,
+  initialBackgroundState,
+} from "../reducers/backgroundSlice";
 
 const FlippedCanvas = styled.canvas`
   transform: scaleX(-1);
@@ -31,7 +34,7 @@ const VideoCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>();
   const backgroundMode = useSelector(getBackgroundMode);
-  const callStateRef = useRef<CallState>(initialCallState);
+  const backgroundStateRef = useRef<BackgroundState>(initialBackgroundState);
   const animationFrame = useRef<number>();
   const backgroundBlurAmount = useSelector(getBackgroundBlurAmount);
   const edgeBlurAmount = useSelector(getEdgeBlurAmount);
@@ -54,7 +57,7 @@ const VideoCanvas = () => {
 
   // Apply call reducer state to ref to prevent stale state issues
   useEffect(() => {
-    callStateRef.current = {
+    backgroundStateRef.current = {
       backgroundMode,
       backgroundBlurAmount,
       edgeBlurAmount,
@@ -128,7 +131,7 @@ const VideoCanvas = () => {
     // Does not receive updates from Redux store
     if (!canvas || !videoElement || !bodyPixNet) return;
 
-    const backgroundMode = callStateRef.current.backgroundMode;
+    const backgroundMode = backgroundStateRef.current.backgroundMode;
 
     // Return early if no effect selected to avoid awaiting segmentation
     if (backgroundMode === VideoBackgroundMode.None) {
@@ -174,8 +177,8 @@ const VideoCanvas = () => {
       canvas,
       videoElement,
       segmentation,
-      callStateRef.current.backgroundBlurAmount,
-      callStateRef.current.edgeBlurAmount
+      backgroundStateRef.current.backgroundBlurAmount,
+      backgroundStateRef.current.edgeBlurAmount
     );
   }
 
@@ -190,8 +193,8 @@ const VideoCanvas = () => {
       canvas,
       videoElement,
       coloredPartImage,
-      callStateRef.current.maskOpacity,
-      callStateRef.current.maskBlurAmount
+      backgroundStateRef.current.maskOpacity,
+      backgroundStateRef.current.maskBlurAmount
     );
   }
   return <FlippedCanvas ref={canvasRef} />;

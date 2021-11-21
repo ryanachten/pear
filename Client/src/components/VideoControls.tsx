@@ -7,8 +7,8 @@ import React, { useContext, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { VideoBackgroundMode } from "../constants/interfaces";
-import { updateBackgroundMode } from "../reducers/callSlice";
-import { getBackgroundMode } from "../selectors/callSelector";
+import { updateBackgroundMode } from "../reducers/backgroundSlice";
+import { getBackgroundMode } from "../selectors/backgroundSelector";
 import { SignalContext } from "../services/SignalService";
 import BlurControls from "./EffectControls/BlurControls";
 import MaskControls from "./EffectControls/MaskControls";

@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   updateMaskBlurAmount,
   updateMaskOpacity,
-} from "../../reducers/callSlice";
+} from "../../reducers/backgroundSlice";
 import {
   getMaskBlurAmount,
   getMaskOpacity,
-} from "../../selectors/callSelector";
+} from "../../selectors/backgroundSelector";
 
 const BlurControls = () => {
   const dispatch = useDispatch();
