@@ -117,7 +117,7 @@ const VideoCanvas = () => {
     const net = await load({
       architecture: "MobileNetV1",
       outputStride: 16,
-      multiplier: 0.75,
+      multiplier: 0.5,
       quantBytes: 2,
     });
 
