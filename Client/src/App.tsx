@@ -1,4 +1,4 @@
-import { Grommet, grommet } from "grommet";
+import { Grommet } from "grommet";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Route, BrowserRouter, Switch, Redirect } from "react-router-dom";
@@ -8,6 +8,7 @@ import { CallPage } from "./pages/CallPage";
 import { serviceSignalInstance, SignalContext } from "./services/SignalService";
 import { LoadingPage } from "./pages/LoadingPage";
 import { isServiceLoading } from "./selectors/peerSelectors";
+import theme from "./theme";
 
 import "./App.css";
 
@@ -15,7 +16,7 @@ function App() {
   const loading = useSelector(isServiceLoading);
 
   return (
-    <Grommet theme={grommet}>
+    <Grommet theme={theme}>
       <BrowserRouter>
         <SignalContext.Provider value={serviceSignalInstance}>
           {loading ? (
