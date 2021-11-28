@@ -3,6 +3,7 @@ import React, { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router";
 import VideoChat from "../components/VideoChat";
+import VideoControls from "../components/VideoControls";
 import { Routes } from "../constants/routes";
 import { getPeerGroup, getPeerGroupError } from "../selectors/peerSelectors";
 import { SignalContext } from "../services/SignalService";
@@ -40,6 +41,7 @@ export const CallPage = () => {
           <Text weight="bold">{group?.groupName}</Text>
         </Text>
       </Header>
+      <VideoControls />
       <VideoChat />
     </Main>
   );

@@ -59,3 +59,9 @@ export interface PeerDisplay {
   connectionId: string;
   user: PeerUserMetadata;
 }
+
+export enum VideoBackgroundMode {
+  None = "None",
+  Blur = "Blur",
+  Mask = "Mask",
+}
