@@ -8,6 +8,7 @@ import { SignalContext } from "../services/SignalService";
 import { useSelector } from "react-redux";
 import { getPeerGroup } from "../selectors/peerSelectors";
 import Background from "../components/Background";
+import { CSSProperties } from "styled-components";
 
 export const LandingPage = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,10 @@ export const LandingPage = () => {
   const [userName, setUserName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
+
+  const disabledContainerStyles: CSSProperties = {
+    opacity: 0.3,
+  };
 
   // Automatically navigate after group has been created and responded by API
   useEffect(() => {
@@ -43,13 +48,14 @@ export const LandingPage = () => {
   };
 
   const JoinCallFields = (
-    <Box>
+    <Box style={groupName ? disabledContainerStyles : {}}>
       <Heading size="small">Join call</Heading>
       <FormField name="call-code" htmlFor="call-code-input" label="Call code">
         <TextInput
           id="call-code"
           name="Call code"
           placeholder="Enter an existing call code"
+          disabled={Boolean(groupName)}
           value={groupCode}
           onChange={(e) => setGroupCode(e.currentTarget.value)}
         />
@@ -58,20 +64,21 @@ export const LandingPage = () => {
   );
 
   const CreateCallFields = (
-    <Box>
+    <Box style={groupCode ? disabledContainerStyles : {}}>
       <Heading size="small">Create call</Heading>
       <FormField
         name="call name"
         htmlFor="call-name-input"
         label="Call name"
         margin={{
-          right: groupCode ? "none" : "xlarge",
+          right: "xlarge",
         }}
       >
         <TextInput
           id="call-name-input"
           name="Call name"
           placeholder="Enter a call name"
+          disabled={Boolean(groupCode)}
           value={groupName}
           onChange={(e) => setGroupName(e.currentTarget.value)}
         />
@@ -122,8 +129,8 @@ export const LandingPage = () => {
             bottom: "large",
           }}
         >
-          {!groupCode && CreateCallFields}
-          {!groupName && JoinCallFields}
+          {CreateCallFields}
+          {JoinCallFields}
         </Box>
         {showSubmitButton && (
           <Box direction="row" justify="center">
