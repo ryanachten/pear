@@ -12,17 +12,17 @@ const Wrapper = styled(Box)`
   max-height: calc(100vh - 60px);
 `;
 
-const MetaWrapper = styled.div`
+const MetaWrapper = styled(Box)`
   position: absolute;
-  left: 10px;
-  top: 10px;
+  right: 0px;
+  top: 0px;
   z-index: 2;
 `;
 
 const VideoWrapper = ({ children, subtitle }: IVideoWrapperProps) => {
   return (
     <Wrapper background="light-4">
-      <MetaWrapper>
+      <MetaWrapper background="background" pad="small" margin="medium">
         <Text>{subtitle}</Text>
       </MetaWrapper>
       {children}

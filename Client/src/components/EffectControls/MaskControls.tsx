@@ -36,7 +36,12 @@ const BlurControls = () => {
 
   return (
     <Box direction="row">
-      <FormField label="Mask Opacity">
+      <FormField
+        label="Mask Opacity"
+        margin={{
+          right: "small",
+        }}
+      >
         <RangeInput
           value={maskOpacity}
           max={maxOpacity}
@@ -44,7 +49,12 @@ const BlurControls = () => {
           step={0.1}
         />
       </FormField>
-      <FormField label="Edge Blur">
+      <FormField
+        label="Edge Blur"
+        margin={{
+          right: "small",
+        }}
+      >
         <RangeInput
           value={maskBlurAmount}
           onChange={updateMaskBlur}

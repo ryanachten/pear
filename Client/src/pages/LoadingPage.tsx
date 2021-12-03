@@ -1,5 +1,6 @@
-import { Box, Heading, Main, Paragraph } from "grommet";
+import { Box, Main } from "grommet";
 import styled from "styled-components";
+import Logo from "../components/Logo";
 import theme from "../theme";
 
 const brandColor = theme.global?.colors?.brand;
@@ -50,7 +51,7 @@ export const LoadingPage = () => {
   return (
     <LoadingBackground justify="center" align="center">
       <Box direction="column" align="center">
-        <Heading>echo</Heading>
+        <Logo />
       </Box>
     </LoadingBackground>
   );

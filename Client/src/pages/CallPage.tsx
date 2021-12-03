@@ -1,7 +1,9 @@
-import { Button, Header, Main, Text } from "grommet";
+import { Box, Button, Header, Main, Text } from "grommet";
+import { Link } from "grommet-icons";
 import React, { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router";
+import Logo from "../components/Logo";
 import VideoChat from "../components/VideoChat";
 import VideoControls from "../components/VideoControls";
 import { Routes } from "../constants/routes";
@@ -33,16 +35,29 @@ export const CallPage = () => {
     return <p>{groupError}</p>;
   }
   return (
-    <Main>
-      <Header background="brand" pad="small">
-        <Button label="New call" onClick={navigateHome} />
-        <Text>
-          <Text>Call: </Text>
-          <Text weight="bold">{group?.groupName}</Text>
-        </Text>
+    <Main pad="large">
+      <Header pad="small">
+        <Logo />
+        <Box direction="row" align="flex-end">
+          <Box
+            margin={{
+              right: "small",
+            }}
+          >
+            <Text weight="bold">Call</Text>
+            <Button
+              active
+              label={group?.groupName}
+              secondary
+              icon={<Link color="#333333" />}
+              reverse
+            />
+          </Box>
+          <Button label="new call" primary onClick={navigateHome} />
+        </Box>
       </Header>
-      <VideoControls />
       <VideoChat />
+      <VideoControls />
     </Main>
   );
 };

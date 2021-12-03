@@ -35,14 +35,24 @@ const BlurControls = () => {
 
   return (
     <Box direction="row">
-      <FormField label="Background Blur">
+      <FormField
+        label="Background Blur"
+        margin={{
+          right: "small",
+        }}
+      >
         <RangeInput
           value={backgroundBlurAmount}
           max={maxBlur}
           onChange={updateBackgroundBlur}
         />
       </FormField>
-      <FormField label="Edge Blur">
+      <FormField
+        label="Edge Blur"
+        margin={{
+          right: "small",
+        }}
+      >
         <RangeInput
           value={edgeBlurAmount}
           onChange={updateEdgeBlur}

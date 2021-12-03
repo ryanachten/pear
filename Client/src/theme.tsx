@@ -75,6 +75,30 @@ const theme: ThemeType = {
       color: "selected-text",
     },
   },
+  button: {
+    border: {
+      radius: "10px",
+    },
+    default: {
+      border: false,
+    },
+    secondary: {
+      background: {
+        color: "#333333",
+        opacity: "medium",
+      },
+      border: false,
+    },
+    primary: {
+      background: {
+        color: "brand",
+      },
+      border: false,
+    },
+    extend: () => `
+      font-weight: bold
+    `,
+  },
   chart: {},
   diagram: {
     line: {},
