@@ -3,10 +3,7 @@ import { ThemeType } from "grommet";
 const theme: ThemeType = {
   global: {
     colors: {
-      brand: {
-        dark: "#7700cc",
-        light: "#F53F40",
-      },
+      brand: "#F53F40",
       background: {
         dark: "#111111",
         light: "#E5E1E1",
