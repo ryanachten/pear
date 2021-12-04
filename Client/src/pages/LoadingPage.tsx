@@ -1,13 +1,29 @@
-import { Box, Heading, Main, Paragraph, Spinner } from "grommet";
+import { Box } from "grommet";
+import styled from "styled-components";
+import Background from "../components/Background";
+import Logo from "../components/Logo";
+import {
+  sonarEffectAnimation,
+  sonarEffectContent,
+} from "../helpers/sonarEffect";
+
+const AnimatedBackground = styled(Background)`
+  &:before {
+    ${sonarEffectContent(40)}
+  }
+  &:after {
+    ${sonarEffectContent(20)}
+  }
+
+  ${sonarEffectAnimation()}
+`;
 
 export const LoadingPage = () => {
   return (
-    <Main pad="large">
+    <AnimatedBackground justify="center" align="center">
       <Box direction="column" align="center">
-        <Heading>echo</Heading>
-        <Paragraph>Please wait while we load!</Paragraph>
-        <Spinner />
+        <Logo />
       </Box>
-    </Main>
+    </AnimatedBackground>
   );
 };

@@ -1,4 +1,4 @@
-import { Button, Select } from "grommet";
+import { Box, Button, Select } from "grommet";
 import {
   Microphone as MicrophoneIcon,
   Video as VideoIcon,
@@ -30,26 +30,35 @@ const VideoControls = () => {
   };
 
   return (
-    <div>
-      <Button
-        active
-        icon={<MicrophoneIcon color={mutedAudio ? "status-error" : "brand"} />}
-        onClick={() => muteAudio(!mutedAudio)}
-      />
-      <Button
-        active
-        margin={{ horizontal: "small" }}
-        icon={<VideoIcon color={mutedVideo ? "status-error" : "brand"} />}
-        onClick={() => muteVideo(!mutedVideo)}
-      />
-      <Select
-        options={Object.values(VideoBackgroundMode)}
-        value={backgroundMode}
-        onChange={({ option }) => dispatch(updateBackgroundMode(option))}
-      />
+    <Box
+      margin={{ top: "medium" }}
+      direction="row"
+      justify="end"
+      align="flex-start"
+    >
       {backgroundMode === VideoBackgroundMode.Blur && <BlurControls />}
       {backgroundMode === VideoBackgroundMode.Mask && <MaskControls />}
-    </div>
+      <Box direction="row" align="center">
+        <Select
+          options={Object.values(VideoBackgroundMode)}
+          value={backgroundMode}
+          onChange={({ option }) => dispatch(updateBackgroundMode(option))}
+        />
+        <Button
+          active
+          margin={{ horizontal: "small" }}
+          icon={
+            <MicrophoneIcon color={mutedAudio ? "status-error" : "brand"} />
+          }
+          onClick={() => muteAudio(!mutedAudio)}
+        />
+        <Button
+          active
+          icon={<VideoIcon color={mutedVideo ? "status-error" : "brand"} />}
+          onClick={() => muteVideo(!mutedVideo)}
+        />
+      </Box>
+    </Box>
   );
 };
 
