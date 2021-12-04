@@ -9,7 +9,6 @@ interface IVideoWrapperProps {
 
 const Wrapper = styled(Box)`
   position: relative;
-  max-height: calc(100vh - 60px);
 `;
 
 const MetaWrapper = styled(Box)`
