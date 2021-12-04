@@ -8,7 +8,21 @@ import { SignalContext } from "../services/SignalService";
 import { useSelector } from "react-redux";
 import { getPeerGroup } from "../selectors/peerSelectors";
 import Background from "../components/Background";
-import { CSSProperties } from "styled-components";
+import styled, { CSSProperties } from "styled-components";
+import Logo from "../components/Logo";
+import theme from "../theme";
+
+const disabledContainerStyles: CSSProperties = {
+  opacity: 0.3,
+};
+
+const brandColor = theme.global?.colors?.brand;
+const LogoWrapper = styled(Box)`
+  border-radius: 50%;
+  box-shadow: 0 0 40px 20px ${brandColor};
+  height: 140px;
+  width: 140px;
+`;
 
 export const LandingPage = () => {
   const dispatch = useDispatch();
@@ -19,10 +33,6 @@ export const LandingPage = () => {
   const [userName, setUserName] = useState("");
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
-
-  const disabledContainerStyles: CSSProperties = {
-    opacity: 0.3,
-  };
 
   // Automatically navigate after group has been created and responded by API
   useEffect(() => {
@@ -89,17 +99,24 @@ export const LandingPage = () => {
   const showSubmitButton = userName && (groupName || groupCode);
 
   return (
-    <Background align="center" justify="center">
+    <Background
+      align="center"
+      pad={{
+        bottom: "xlarge",
+      }}
+    >
       <Form>
-        <Heading
-          textAlign="center"
+        <LogoWrapper
+          align="center"
+          justify="center"
           margin={{
-            top: "none",
-            bottom: "large",
+            horizontal: "auto",
+            top: "xlarge",
+            bottom: "xlarge",
           }}
         >
-          echo
-        </Heading>
+          <Logo size="h1" />
+        </LogoWrapper>
         <Box
           direction="row"
           border="bottom"

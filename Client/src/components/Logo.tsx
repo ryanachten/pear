@@ -1,5 +1,5 @@
-import { Heading } from "grommet";
+import { Heading, HeadingProps } from "grommet";
 
-const Logo = () => <Heading>echo</Heading>;
+const Logo = (props: HeadingProps) => <Heading {...props}>echo</Heading>;
 
 export default Logo;

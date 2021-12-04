@@ -1,9 +1,10 @@
-import { Box, Button, Header, Main, Text } from "grommet";
+import { Box, Button, Header, Text } from "grommet";
 import { Link, Checkmark } from "grommet-icons";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router";
 import styled from "styled-components";
+import Background from "../components/Background";
 import Logo from "../components/Logo";
 import VideoChat from "../components/VideoChat";
 import VideoControls from "../components/VideoControls";
@@ -11,6 +12,7 @@ import { Routes } from "../constants/routes";
 import { getPeerGroup, getPeerGroupError } from "../selectors/peerSelectors";
 import { SignalContext } from "../services/SignalService";
 import theme from "../theme";
+import ErrorPage from "./ErrorPage";
 import { LoadingPage } from "./LoadingPage";
 
 interface CallPageParams {
@@ -48,12 +50,12 @@ export const CallPage = () => {
     return <LoadingPage />;
   }
   if (groupError) {
-    return <p>{groupError}</p>;
+    return <ErrorPage errorMessage={groupError} />;
   }
   return (
-    <Main pad="large">
+    <Background pad="large">
       <Header pad="small">
-        <Logo />
+        <Logo size="h1" />
         <Box direction="row" align="flex-end">
           <Box
             margin={{
@@ -78,6 +80,6 @@ export const CallPage = () => {
       </Header>
       <VideoChat />
       <VideoControls />
-    </Main>
+    </Background>
   );
 };
