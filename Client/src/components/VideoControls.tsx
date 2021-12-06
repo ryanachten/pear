@@ -8,7 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { VideoBackgroundMode } from "../constants/interfaces";
 import { updateBackgroundMode } from "../reducers/backgroundSlice";
+import { updateVideoMuted } from "../reducers/callSlice";
 import { getBackgroundMode } from "../selectors/backgroundSelector";
+import { getVideoMuted } from "../selectors/callSelector";
 import { SignalContext } from "../services/SignalService";
 import BlurControls from "./EffectControls/BlurControls";
 import MaskControls from "./EffectControls/MaskControls";
@@ -17,7 +19,7 @@ const VideoControls = () => {
   const dispatch = useDispatch();
   const signalService = useContext(SignalContext);
   const [mutedAudio, setMuteAudio] = useState(false);
-  const [mutedVideo, setMuteVideo] = useState(false);
+  const mutedVideo = useSelector(getVideoMuted);
   const backgroundMode = useSelector(getBackgroundMode);
 
   const muteAudio = (muted: boolean) => {
@@ -25,8 +27,7 @@ const VideoControls = () => {
     setMuteAudio(muted);
   };
   const muteVideo = (muted: boolean) => {
-    signalService.enableVideoStream(!muted);
-    setMuteVideo(muted);
+    dispatch(updateVideoMuted(muted));
   };
 
   return (
