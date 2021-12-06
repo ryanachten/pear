@@ -64,14 +64,16 @@ export class SignalService {
   }
 
   public enableAudioStream(value: boolean) {
-    var tracks = this.stream?.getAudioTracks();
+    const tracks = this.stream?.getAudioTracks();
     tracks?.forEach((track) => {
       track.enabled = value;
     });
   }
 
+  // This doesn't seem to work with CanvasCaptureMediaStreamTrack
+  // hence the current workaround in VideoCanvas muting video and rendering empty frames
   public enableVideoStream(value: boolean) {
-    var tracks = this.stream?.getVideoTracks();
+    const tracks = this.stream?.getVideoTracks();
     tracks?.forEach((track) => {
       track.enabled = value;
     });

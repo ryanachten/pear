@@ -8,7 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { VideoBackgroundMode } from "../constants/interfaces";
 import { updateBackgroundMode } from "../reducers/backgroundSlice";
+import { updateVideoMuted } from "../reducers/callSlice";
 import { getBackgroundMode } from "../selectors/backgroundSelector";
+import { getVideoMuted } from "../selectors/callSelector";
 import { SignalContext } from "../services/SignalService";
 import BlurControls from "./EffectControls/BlurControls";
 import MaskControls from "./EffectControls/MaskControls";
@@ -16,8 +18,8 @@ import MaskControls from "./EffectControls/MaskControls";
 const VideoControls = () => {
   const dispatch = useDispatch();
   const signalService = useContext(SignalContext);
-  const [mutedAudio, setMuteAudio] = useState(true);
-  const [mutedVideo, setMuteVideo] = useState(false);
+  const [mutedAudio, setMuteAudio] = useState(false);
+  const mutedVideo = useSelector(getVideoMuted);
   const backgroundMode = useSelector(getBackgroundMode);
 
   const muteAudio = (muted: boolean) => {
@@ -25,13 +27,13 @@ const VideoControls = () => {
     setMuteAudio(muted);
   };
   const muteVideo = (muted: boolean) => {
-    signalService.enableVideoStream(!muted);
-    setMuteVideo(muted);
+    dispatch(updateVideoMuted(muted));
   };
 
   return (
     <Box
       margin={{ top: "medium" }}
+      pad={{ bottom: "medium" }}
       direction="row"
       justify="end"
       align="flex-start"
@@ -47,14 +49,12 @@ const VideoControls = () => {
         <Button
           active
           margin={{ horizontal: "small" }}
-          icon={
-            <MicrophoneIcon color={mutedAudio ? "status-error" : "brand"} />
-          }
+          icon={<MicrophoneIcon color={mutedAudio ? "status-error" : "text"} />}
           onClick={() => muteAudio(!mutedAudio)}
         />
         <Button
           active
-          icon={<VideoIcon color={mutedVideo ? "status-error" : "brand"} />}
+          icon={<VideoIcon color={mutedVideo ? "status-error" : "text"} />}
           onClick={() => muteVideo(!mutedVideo)}
         />
       </Box>

@@ -23,6 +23,8 @@ import {
   BackgroundState,
   initialBackgroundState,
 } from "../reducers/backgroundSlice";
+import { getVideoMuted } from "../selectors/callSelector";
+import { CallState, initialCallState } from "../reducers/callSlice";
 
 const FlippedCanvas = styled.canvas`
   transform: scaleX(-1);
@@ -31,8 +33,12 @@ const FlippedCanvas = styled.canvas`
 const VideoCanvas = () => {
   const signalContext = useContext(SignalContext);
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
+  const audioTracksRef = useRef<Array<MediaStreamTrack>>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>();
+  const callStateRef = useRef<CallState>(initialCallState);
+  const mutedVideo = useSelector(getVideoMuted);
+
   const backgroundMode = useSelector(getBackgroundMode);
   const backgroundStateRef = useRef<BackgroundState>(initialBackgroundState);
   const animationFrame = useRef<number>();
@@ -54,6 +60,19 @@ const VideoCanvas = () => {
       }
     };
   }, [bodyPixNet]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (mutedVideo) {
+      video?.pause();
+    } else {
+      video?.play();
+    }
+    callStateRef.current = {
+      ...callStateRef.current,
+      videoMuted: mutedVideo,
+    };
+  }, [mutedVideo]);
 
   // Apply call reducer state to ref to prevent stale state issues
   useEffect(() => {
@@ -82,6 +101,10 @@ const VideoCanvas = () => {
     // Set canvas as stream source and initate peer connection
     const maxFrameRate = 25;
     const stream = canvasElement.captureStream(maxFrameRate);
+
+    // Assign microphone audio output to stream
+    audioTracksRef.current.forEach((track) => stream.addTrack(track));
+
     signalContext.stream = stream;
     signalContext.sendConnection();
 
@@ -106,8 +129,13 @@ const VideoCanvas = () => {
       video: true,
       audio: true,
     });
+
+    const tracks = stream.getAudioTracks();
+    audioTracksRef.current = tracks;
+
     const video = document.createElement("video");
     video.srcObject = stream;
+    video.muted = true;
     video.play();
 
     videoRef.current = video;
@@ -133,6 +161,12 @@ const VideoCanvas = () => {
 
     const backgroundMode = backgroundStateRef.current.backgroundMode;
 
+    if (callStateRef.current.videoMuted) {
+      clearFrame();
+      animationFrame.current = requestAnimationFrame(animate);
+      return;
+    }
+
     // Return early if no effect selected to avoid awaiting segmentation
     if (backgroundMode === VideoBackgroundMode.None) {
       drawVideo();
@@ -156,6 +190,15 @@ const VideoCanvas = () => {
     }
 
     animationFrame.current = requestAnimationFrame(animate);
+  }
+
+  function clearFrame() {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+
+    if (canvas && ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   }
 
   function drawVideo() {
