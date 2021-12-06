@@ -31,6 +31,7 @@ const FlippedCanvas = styled.canvas`
 const VideoCanvas = () => {
   const signalContext = useContext(SignalContext);
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
+  const audioTracksRef = useRef<Array<MediaStreamTrack>>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>();
   const backgroundMode = useSelector(getBackgroundMode);
@@ -82,6 +83,10 @@ const VideoCanvas = () => {
     // Set canvas as stream source and initate peer connection
     const maxFrameRate = 25;
     const stream = canvasElement.captureStream(maxFrameRate);
+
+    // Assign microphone audio output to stream
+    audioTracksRef.current.forEach((track) => stream.addTrack(track));
+
     signalContext.stream = stream;
     signalContext.sendConnection();
 
@@ -106,8 +111,13 @@ const VideoCanvas = () => {
       video: true,
       audio: true,
     });
+
+    const tracks = stream.getAudioTracks();
+    audioTracksRef.current = tracks;
+
     const video = document.createElement("video");
     video.srcObject = stream;
+    video.muted = true;
     video.play();
 
     videoRef.current = video;

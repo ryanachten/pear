@@ -16,7 +16,7 @@ import MaskControls from "./EffectControls/MaskControls";
 const VideoControls = () => {
   const dispatch = useDispatch();
   const signalService = useContext(SignalContext);
-  const [mutedAudio, setMuteAudio] = useState(true);
+  const [mutedAudio, setMuteAudio] = useState(false);
   const [mutedVideo, setMuteVideo] = useState(false);
   const backgroundMode = useSelector(getBackgroundMode);
 
@@ -47,14 +47,12 @@ const VideoControls = () => {
         <Button
           active
           margin={{ horizontal: "small" }}
-          icon={
-            <MicrophoneIcon color={mutedAudio ? "status-error" : "brand"} />
-          }
+          icon={<MicrophoneIcon color={mutedAudio ? "status-error" : "text"} />}
           onClick={() => muteAudio(!mutedAudio)}
         />
         <Button
           active
-          icon={<VideoIcon color={mutedVideo ? "status-error" : "brand"} />}
+          icon={<VideoIcon color={mutedVideo ? "status-error" : "text"} />}
           onClick={() => muteVideo(!mutedVideo)}
         />
       </Box>

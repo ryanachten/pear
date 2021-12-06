@@ -19,7 +19,6 @@ interface CallPageParams {
   groupCode: string;
 }
 
-const textColor = "#333333";
 const branchColor = theme.global?.colors?.brand as string;
 const CheckIcon = styled(Checkmark)`
   background: ${branchColor};
@@ -71,7 +70,7 @@ export const CallPage = () => {
               }
               secondary
               reverse
-              icon={<Link color={textColor} />}
+              icon={<Link color="text" />}
               onClick={onLinkClick}
             />
           </Box>
