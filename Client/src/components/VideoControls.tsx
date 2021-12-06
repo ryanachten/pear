@@ -33,6 +33,7 @@ const VideoControls = () => {
   return (
     <Box
       margin={{ top: "medium" }}
+      pad={{ bottom: "medium" }}
       direction="row"
       justify="end"
       align="flex-start"

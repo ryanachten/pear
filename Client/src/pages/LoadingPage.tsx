@@ -7,7 +7,14 @@ import {
   sonarEffectContent,
 } from "../helpers/sonarEffect";
 
-const AnimatedBackground = styled(Background)`
+const ClippedBackground = styled(Background)`
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
+  position: relative;
+`;
+
+const Animation = styled.div`
   &:before {
     ${sonarEffectContent(40)}
   }
@@ -20,10 +27,12 @@ const AnimatedBackground = styled(Background)`
 
 export const LoadingPage = () => {
   return (
-    <AnimatedBackground justify="center" align="center">
-      <Box direction="column" align="center">
-        <Logo />
-      </Box>
-    </AnimatedBackground>
+    <ClippedBackground justify="center" align="center">
+      <Animation>
+        <Box direction="column" align="center">
+          <Logo />
+        </Box>
+      </Animation>
+    </ClippedBackground>
   );
 };
