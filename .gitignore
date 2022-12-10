@@ -230,3 +230,7 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+startup.ps1
+*/.terraform/*
+*/*.tfstate*
