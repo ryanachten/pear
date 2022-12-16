@@ -9,6 +9,7 @@ interface IVideoWrapperProps {
 
 const Wrapper = styled(Box)`
   position: relative;
+  height: 100%;
 `;
 
 const MetaWrapper = styled(Box)`

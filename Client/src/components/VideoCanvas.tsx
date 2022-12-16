@@ -27,6 +27,7 @@ import { getVideoMuted } from "../selectors/callSelector";
 import { CallState, initialCallState } from "../reducers/callSlice";
 
 const FlippedCanvas = styled.canvas`
+  height: 100%;
   transform: scaleX(-1);
 `;
 

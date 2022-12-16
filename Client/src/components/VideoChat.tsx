@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from "react";
 import { useSelector } from "react-redux";
-import styled from "styled-components";
+import styled, { CSSProperties } from "styled-components";
 
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
@@ -14,6 +14,13 @@ const VideoGrid = styled.div`
   grid-gap: 15px;
   grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
 `;
+
+const singleVideoStyles: CSSProperties = {
+  alignItems: "center",
+  display: "flex",
+  height: "80vh",
+  justifyContent: "center",
+};
 
 const VideoChat = () => {
   const signalService = useContext(SignalContext);
@@ -40,8 +47,10 @@ const VideoChat = () => {
     return videos;
   }, [peers]);
 
+  const hasPeers = Boolean(peers.length);
+
   return (
-    <VideoGrid>
+    <VideoGrid style={!hasPeers ? singleVideoStyles : {}}>
       <VideoWrapper subtitle={userName}>
         <VideoCanvas />
       </VideoWrapper>

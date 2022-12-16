@@ -77,6 +77,7 @@ The updated video feed is then rendered using the HTML canvas API and streamed v
 ### Requirements
 
 - .NET CLI v5.0
+- Node v16
 
 ### Running .NET and React locally
 
