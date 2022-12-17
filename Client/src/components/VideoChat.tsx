@@ -5,7 +5,8 @@ import styled, { CSSProperties } from "styled-components";
 import { getPeers } from "../selectors/peerSelectors";
 import { getUserName } from "../selectors/userSelectors";
 import { SignalContext } from "../services/SignalService";
-import VideoCanvas from "./VideoCanvas";
+import BodyPixCanvas from "./BodyPixCanvas";
+import ThreeCanvas from "./ThreeCanvas";
 import { VideoPlayer } from "./VideoPlayer";
 import VideoWrapper from "./VideoWrapper";
 
@@ -52,7 +53,8 @@ const VideoChat = () => {
   return (
     <VideoGrid style={!hasPeers ? singleVideoStyles : {}}>
       <VideoWrapper subtitle={userName}>
-        <VideoCanvas />
+        {/* <BodyPixCanvas /> */}
+        <ThreeCanvas />
       </VideoWrapper>
       {PeerVideos}
     </VideoGrid>

@@ -31,7 +31,7 @@ const FlippedCanvas = styled.canvas`
   transform: scaleX(-1);
 `;
 
-const VideoCanvas = () => {
+const BodyPixCanvas = () => {
   const signalContext = useContext(SignalContext);
   const [bodyPixNet, setBodyPixNet] = useState<BodyPix>();
   const audioTracksRef = useRef<Array<MediaStreamTrack>>([]);
@@ -244,4 +244,4 @@ const VideoCanvas = () => {
   return <FlippedCanvas ref={canvasRef} />;
 };
 
-export default VideoCanvas;
+export default BodyPixCanvas;
