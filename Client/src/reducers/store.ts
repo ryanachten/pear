@@ -3,6 +3,7 @@ import peerReducer from "./peerSlice";
 import userReducer from "./userSlice";
 import backgroundReducer from "./backgroundSlice";
 import callReducer from "./callSlice";
+import effectReducer from "./effectSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     peers: peerReducer,
     background: backgroundReducer,
     call: callReducer,
+    effect: effectReducer,
   },
 });
 
